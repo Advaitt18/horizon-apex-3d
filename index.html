@@ -145,6 +145,132 @@
     .mx-env-art { height: 90px; }
   }
 </style>
+<style>
+  /* ---------- quick-menu button (top right, next to the timer) ---------- */
+  #hx-menu-btn { pointer-events: auto; width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    font-size: 20px; color: #fff; border: 1px solid rgba(255,255,255,.18); cursor: pointer; }
+  #hx-menu-btn:hover { border-color: #f97316; }
+  .hx-top-right { display: flex; align-items: flex-start; gap: 8px; }
+
+  /* ---------- bottom HUD ---------- */
+  #hx-hud { position: fixed; inset: 0; z-index: 20; pointer-events: none; }
+  #hx-hud > * { position: absolute; pointer-events: auto; }
+  #hx-map { left: 16px; bottom: 16px; border-radius: 16px; padding: 8px; border: 1px solid rgba(255,255,255,.15); }
+  .hx-map-head { display: flex; justify-content: space-between; gap: 10px; font: 700 10px/1.2 'JetBrains Mono', ui-monospace, monospace;
+    letter-spacing: .06em; color: #94a3b8; margin: 0 2px 5px; }
+  #hud-lap-pct { color: #fb923c; }
+  #minimap-canvas { display: block; width: 176px; height: 140px; border-radius: 10px; background: rgba(2,6,23,.75); }
+
+  #hx-dial-wrap { right: 16px; bottom: 12px; width: 236px; display: flex; flex-direction: column; align-items: center; gap: 4px; pointer-events: none; }
+  #hud-dial { width: 236px; height: 236px; display: block; filter: drop-shadow(0 8px 24px rgba(0,0,0,.55)); }
+  .hx-dial-tags { display: flex; gap: 6px; align-items: center; justify-content: center; flex-wrap: wrap; }
+  .hx-car { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 99px; background: rgba(2,6,23,.7);
+    border: 1px solid rgba(255,255,255,.12); font: 800 10px/1.3 'JetBrains Mono', ui-monospace, monospace; color: #fdba74; letter-spacing: .05em; white-space: nowrap; }
+  #hud-car-dot { width: 8px; height: 8px; border-radius: 50%; background: #f97316; }
+  #drift-badge { opacity: 0; transition: opacity .15s; padding: 3px 8px; border-radius: 6px; font: 900 10px/1.3 'JetBrains Mono', ui-monospace, monospace;
+    color: #fcd34d; background: rgba(245,158,11,.2); border: 1px solid rgba(251,191,36,.4); }
+
+  /* ---------- touch controls (hidden on desktop) ---------- */
+  .hx-touch { display: none !important; }
+  body.touch-ui .hx-touch { display: flex !important; }
+  .hx-touch button { touch-action: none; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; cursor: pointer; }
+  #hx-steer { left: 14px; bottom: 14px; flex-direction: column; align-items: flex-start; gap: 10px; }
+  .hx-steer-row { display: flex; gap: 12px; }
+  .hx-arrow { width: 74px; height: 74px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    background: rgba(15,23,42,.55); border: 2px solid rgba(255,255,255,.28); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+  .hx-arrow svg { width: 36px; height: 36px; fill: none; stroke: #fff; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+  .hx-arrow.active { background: rgba(249,115,22,.55); border-color: #fb923c; transform: scale(.94); }
+  .hx-paddles { display: none; gap: 10px; }
+  body.manual-trans .hx-paddles { display: flex; }
+  .hx-paddle { width: 62px; height: 46px; border-radius: 12px; color: #fff; font-size: 16px; font-weight: 900; line-height: 1;
+    background: rgba(15,23,42,.6); border: 2px solid rgba(56,189,248,.5); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+  .hx-paddle small { font: 800 8px/1 'JetBrains Mono', ui-monospace, monospace; color: #7dd3fc; letter-spacing: .08em; }
+  .hx-paddle.active { background: rgba(56,189,248,.45); transform: scale(.94); }
+
+  #hx-pedals { right: 14px; bottom: 14px; flex-direction: column; align-items: flex-end; gap: 10px; }
+  .hx-pedal-extras { display: flex; gap: 10px; }
+  .hx-round { width: 54px; height: 54px; border-radius: 50%; font: 900 10px/1 'JetBrains Mono', ui-monospace, monospace; color: #fff;
+    background: rgba(15,23,42,.6); border: 2px solid rgba(255,255,255,.25); }
+  .hx-drift { color: #fcd34d; border-color: rgba(245,158,11,.55); }
+  .hx-nitro { color: #f0abfc; border-color: rgba(217,70,239,.6); font-size: 12px; }
+  .hx-round.active { transform: scale(.92); background: rgba(217,70,239,.4); }
+  .hx-drift.active { background: rgba(245,158,11,.4); }
+  .hx-pedal-row { display: flex; align-items: flex-end; gap: 12px; }
+  .hx-pedal { position: relative; display: flex; flex-direction: column; justify-content: center; gap: 6px; padding: 10px 9px 22px;
+    border-radius: 12px 12px 18px 18px; background: linear-gradient(#3a3f4a, #1d2027); border: 2px solid #5b6270;
+    box-shadow: 0 6px 0 #0b0d12, 0 10px 18px rgba(0,0,0,.45); transition: transform .06s, box-shadow .06s; }
+  .hx-pedal span { display: block; height: 5px; border-radius: 3px; background: #11141a; box-shadow: inset 0 1px 0 rgba(0,0,0,.6), 0 1px 0 rgba(255,255,255,.08); }
+  .hx-pedal em { position: absolute; left: 0; right: 0; bottom: 6px; text-align: center; font: 900 9px/1 'JetBrains Mono', ui-monospace, monospace; font-style: normal; letter-spacing: .1em; }
+  .hx-brake { width: 74px; height: 76px; } .hx-brake em { color: #fda4af; }
+  .hx-gas { width: 52px; height: 112px; } .hx-gas em { color: #6ee7b7; }
+  .hx-pedal.active { transform: translateY(5px) perspective(300px) rotateX(14deg); box-shadow: 0 1px 0 #0b0d12, 0 4px 10px rgba(0,0,0,.45); }
+  .hx-brake.active { border-color: #fb7185; } .hx-gas.active { border-color: #34d399; }
+
+  /* touch layout: dial moves to bottom-centre, minimap to the left under the position card */
+  body.touch-ui #hx-dial-wrap { right: auto; left: 50%; transform: translateX(-50%); bottom: 6px; width: 170px; }
+  body.touch-ui #hud-dial { width: 170px; height: 170px; }
+  body.touch-ui .hx-car { display: none; }
+  body.touch-ui #hx-map { left: 12px; bottom: auto; top: 104px; padding: 6px; }
+  body.touch-ui #minimap-canvas { width: 118px; height: 94px; }
+  body.touch-ui .hx-map-head { font-size: 8px; }
+  body.touch-ui .hx-map-head #hud-track-name { display: none; }
+  @media (max-height: 430px) {
+    body.touch-ui #hx-dial-wrap { width: 140px; } body.touch-ui #hud-dial { width: 140px; height: 140px; }
+    body.touch-ui #hx-map { top: 92px; } body.touch-ui #minimap-canvas { width: 96px; height: 76px; }
+    .hx-arrow { width: 64px; height: 64px; } .hx-gas { height: 96px; } .hx-brake { height: 64px; }
+    .hx-round { width: 46px; height: 46px; }
+  }
+
+  /* ---------- quick menu pop-up ---------- */
+  #hx-pop-backdrop { position: fixed; inset: 0; z-index: 44; background: rgba(2,6,23,.45); display: none; }
+  #hx-pop { position: fixed; z-index: 45; top: 64px; right: 14px; width: min(420px, calc(100vw - 28px)); max-height: calc(100vh - 80px); overflow-y: auto;
+    border-radius: 18px; padding: 12px; border: 1px solid rgba(249,115,22,.4); display: none; color: #fff; }
+  body.qm-open #hx-pop, body.qm-open #hx-pop-backdrop { display: block; }
+  .hx-pop-head { display: flex; align-items: center; gap: 8px; font: 800 11px/1 'JetBrains Mono', ui-monospace, monospace; letter-spacing: .18em; color: #fb923c; margin-bottom: 10px; }
+  .hx-pop-head .hx-paused { margin-left: auto; color: #94a3b8; letter-spacing: .1em; }
+  .hx-pop-head button { width: 30px; height: 30px; border-radius: 8px; color: #fff; background: rgba(15,23,42,.8); border: 1px solid #475569; cursor: pointer; }
+  .hx-pop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .hx-pop-grid button { display: flex; align-items: center; gap: 8px; padding: 10px; border-radius: 12px; text-align: left; color: #fff; cursor: pointer;
+    font-size: 13px; font-weight: 700; background: rgba(15,23,42,.8); border: 1px solid #334155; }
+  .hx-pop-grid button:hover { border-color: #f97316; }
+  .hx-pop-grid b { font-size: 16px; width: 20px; text-align: center; }
+  .hx-pop-grid kbd { margin-left: auto; font: 700 10px/1 'JetBrains Mono', ui-monospace, monospace; color: #94a3b8; border: 1px solid #475569; border-radius: 4px; padding: 3px 5px; }
+  .hx-vol { display: flex; align-items: center; gap: 10px; margin-top: 10px; padding: 8px 10px; border-radius: 12px; background: rgba(15,23,42,.8); border: 1px solid #334155; }
+  .hx-vol button { font-size: 16px; cursor: pointer; }
+  .hx-vol input { flex: 1; accent-color: #f97316; }
+  .hx-keys { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 10px; font: 500 10.5px/1.5 'JetBrains Mono', ui-monospace, monospace; color: #cbd5e1; }
+  .hx-keys b { color: #fb923c; }
+  body.touch-ui .hx-keys, body.touch-ui .hx-pop-grid kbd { display: none; }
+
+  /* ---------- transmission chooser (garage) ---------- */
+  #trans-modal { position: absolute; inset: 0; z-index: 5; display: none; align-items: center; justify-content: center; padding: 16px;
+    background: rgba(2,6,23,.72); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); pointer-events: auto; }
+  #trans-modal.show { display: flex; }
+  .tm-box { width: min(520px, 100%); border-radius: 22px; padding: 18px; border: 1px solid rgba(249,115,22,.45); background: rgba(15,23,42,.95); text-align: center; }
+  .tm-title { font-size: 22px; font-weight: 900; font-style: italic; margin: 4px 0 14px; }
+  .tm-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .tm-opt { padding: 16px 12px; border-radius: 16px; border: 2px solid #334155; background: rgba(2,6,23,.7); color: #fff; cursor: pointer; text-align: left; }
+  .tm-opt:hover { border-color: #f97316; }
+  .tm-opt .tm-ic { font-size: 28px; }
+  .tm-opt .tm-n { font-size: 17px; font-weight: 900; font-style: italic; margin-top: 6px; }
+  .tm-opt .tm-d { font-size: 12px; color: #94a3b8; margin-top: 3px; line-height: 1.45; }
+  .tm-opt .tm-d b { color: #fdba74; }
+  .tm-cancel { margin-top: 12px; font-size: 13px; color: #94a3b8; cursor: pointer; background: none; border: 0; text-decoration: underline; }
+  @media (max-width: 480px) { .tm-opts { grid-template-columns: 1fr; } }
+
+  /* touch: keep the score / skill chain in the top-centre gap instead of a second row */
+  body.touch-ui header > div:nth-child(2) { position: absolute; left: 50%; top: 10px; transform: translateX(-50%); width: auto; margin: 0; }
+  body.touch-ui header > div:nth-child(2) > div:last-child { font-size: 9px; padding: 2px 8px; white-space: nowrap; }
+  body.touch-ui #skill-box { padding: 3px 10px; }
+  body.touch-ui #skill-box .w-40 { width: 6rem; }
+  @media (max-height: 500px) {
+    #hx-pop { top: 8px; max-height: calc(100vh - 16px); padding: 10px; }
+    .hx-pop-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    .hx-pop-grid button { flex-direction: column; align-items: flex-start; gap: 4px; padding: 8px; font-size: 12px; }
+    #hx-pop { width: min(560px, calc(100vw - 28px)); right: 50%; transform: translateX(50%); }
+  }
+  body.menu-open #hx-hud, body.menu-open #hx-pop { display: none !important; }
+</style>
 </head>
 <body class="menu-open" data-x="">
 
@@ -222,7 +348,7 @@
   </div>
 
   <!-- TOP RIGHT: TIMERS & QUICK CONTROLS -->
-  <div class="flex flex-col items-end gap-2 pointer-events-auto order-2 lg:order-3">
+  <div class="hx-top-right pointer-events-auto order-2 lg:order-3">
     <div class="glass skew-card rounded-xl px-4 py-2 border-r-4 border-r-sky-400 flex items-center gap-4">
       <div class="unskew text-right">
         <div id="hud-gold-label" class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mono">RACE TIME (GOLD &lt; 05:00)</div>
@@ -235,120 +361,78 @@
       </div>
     </div>
 
-    <!-- Action Bar -->
-    <div class="flex items-center gap-1.5 flex-wrap justify-end">
-      <button onclick="Game.openGarage()" class="glass hover:bg-orange-500/30 border-orange-500/40 text-xs font-extrabold px-2.5 py-1.5 rounded-lg flex items-center gap-1 text-orange-300 transition" title="Select Car / Garage">
-        <span>🏠</span> <span>Menu</span>
-      </button>
-      <button onclick="Game.cycleCamera()" class="glass hover:bg-slate-800/90 text-xs font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition" title="Shortcut: C">
-        <span>🎥</span> <span id="cam-label">Chase Cam</span>
-      </button>
-      <button onclick="Game.cycleSkyPreset()" class="glass hover:bg-slate-800/90 text-xs font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition" title="Shortcut: L">
-        <span id="sky-icon">🌅</span> <span id="sky-label">Sunset</span>
-      </button>
-      <button onclick="Game.cycleQuality()" class="glass hover:bg-slate-800/90 text-xs font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition" title="Graphics quality — Shortcut: G">
-        <span>✨</span> <span id="quality-label">High</span>
-      </button>
-      <button onclick="Game.toggleUnits()" class="glass hover:bg-slate-800/90 text-xs font-bold px-2.5 py-1.5 rounded-lg mono transition">
-        <span id="unit-btn-label">KM/H</span>
-      </button>
-      <div class="glass px-2.5 py-1 rounded-lg flex items-center gap-1.5" title="Master Engine Volume">
-        <button onclick="Game.toggleAudio()" class="text-xs font-bold"><span id="audio-icon">🔊</span></button>
-        <input id="vol-slider" type="range" min="0" max="150" value="125" oninput="Game.setVolume(this.value)" class="w-14 sm:w-20 accent-orange-500 cursor-pointer h-1.5 bg-slate-700 rounded-lg">
-      </div>
-      <button onclick="Game.resetCarToTrack()" class="glass hover:bg-slate-800/90 text-xs font-bold px-2.5 py-1.5 rounded-lg text-amber-300 transition" title="Shortcut: R">
-        ↺ Reset Car
-      </button>
-      <button onclick="Game.downloadGithubZip()" class="glass hover:bg-emerald-500/30 border-emerald-500/40 text-xs font-extrabold px-2.5 py-1.5 rounded-lg text-emerald-300 transition" title="Download Ready-to-Upload GitHub ZIP">
-        📦 Export .ZIP
-      </button>
-    </div>
+    <button id="hx-menu-btn" class="glass" onclick="Game.toggleQuickMenu()" aria-label="Quick menu" title="Quick menu (Esc)">☰</button>
   </div>
 </header>
 
 <!-- ==========================================
-     BOTTOM HUD: MINIMAP, TOUCH CONTROLS, TACHOMETER & NITRO
+     BOTTOM HUD: MINIMAP, DIAL SPEEDOMETER, TOUCH STEERING / PEDALS / PADDLES
      ========================================== -->
-<footer class="fixed bottom-0 left-0 right-0 z-20 p-3 sm:p-5 flex items-end justify-between gap-4 pointer-events-none">
+<div id="hx-hud">
+  <!-- minimap -->
+  <div id="hx-map" class="glass">
+    <div class="hx-map-head"><span id="hud-track-name">HORIZON APEX CIRCUIT (4.1 KM)</span><span id="hud-lap-pct">0%</span></div>
+    <canvas id="minimap-canvas" width="176" height="140"></canvas>
+  </div>
 
-  <!-- BOTTOM LEFT: 2D CIRCUIT MINIMAP + KEYBOARD LEGEND -->
-  <div class="flex flex-col gap-2 pointer-events-auto">
-    <div class="glass rounded-2xl p-2.5 border border-white/15 relative">
-      <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400 mono mb-1 px-1">
-        <span id="hud-track-name">HORIZON APEX CIRCUIT (4.1 KM)</span>
-        <span id="hud-lap-pct" class="text-orange-400">0%</span>
-      </div>
-      <canvas id="minimap-canvas" width="176" height="140" class="w-36 h-28 sm:w-44 sm:h-36 block rounded-lg bg-slate-950/75"></canvas>
+  <!-- dial speedometer -->
+  <div id="hx-dial-wrap">
+    <div class="hx-dial-tags">
+      <span class="hx-car"><span id="hud-car-dot"></span><span id="hud-car-name">MUSTANG SHELBY GT • 5.0L V8</span></span>
+      <span id="drift-badge">DRIFTING</span>
     </div>
-    <div class="hidden xl:flex items-center gap-2 glass px-3 py-1.5 rounded-xl text-[11px] text-slate-300 mono">
-      <span><b class="text-white">W/S</b> Drive</span> ·
-      <span><b class="text-white">A/D</b> Steer</span> ·
-      <span><b class="text-orange-400">SPACE</b> Handbrake</span> ·
-      <span><b class="text-fuchsia-400">SHIFT</b> Nitro / Shockwave</span> ·
-      <span><b class="text-sky-300">C</b> Cam</span>
+    <canvas id="hud-dial" width="440" height="440"></canvas>
+  </div>
+
+  <!-- touch: steering -->
+  <div id="hx-steer" class="hx-touch">
+    <div id="hx-paddles-l" class="hx-paddles">
+      <button id="t-down" class="hx-paddle">▼<small>DOWN</small></button>
+      <button id="t-up" class="hx-paddle">▲<small>UP</small></button>
+    </div>
+    <div class="hx-steer-row">
+      <button id="t-left" class="hx-arrow" aria-label="Steer left"><svg viewBox="0 0 24 24"><path d="M15 4 7 12l8 8" /></svg></button>
+      <button id="t-right" class="hx-arrow" aria-label="Steer right"><svg viewBox="0 0 24 24"><path d="m9 4 8 8-8 8" /></svg></button>
     </div>
   </div>
 
-  <!-- MOBILE / POINTER TOUCH CONTROLS -->
-  <div class="flex lg:hidden items-center justify-between w-full max-w-md mx-auto pointer-events-auto gap-2 mb-1">
-    <div class="flex gap-2">
-      <button id="t-left" class="touch-btn w-14 h-14 rounded-2xl font-black text-xl text-white flex items-center justify-center">◀</button>
-      <button id="t-right" class="touch-btn w-14 h-14 rounded-2xl font-black text-xl text-white flex items-center justify-center">▶</button>
+  <!-- touch: pedals -->
+  <div id="hx-pedals" class="hx-touch">
+    <div class="hx-pedal-extras">
+      <button id="t-drift" class="hx-round hx-drift">DRIFT</button>
+      <button id="t-nitro" class="hx-round hx-nitro">N₂O</button>
     </div>
-    <div class="flex gap-2">
-      <button id="t-drift" class="touch-btn px-3 h-14 rounded-2xl font-extrabold text-xs uppercase text-amber-300 border-amber-500/40">DRIFT</button>
-      <button id="t-nitro" class="touch-btn px-3 h-14 rounded-2xl font-extrabold text-xs uppercase text-fuchsia-300 border-fuchsia-500/40">NITRO</button>
-      <button id="t-brake" class="touch-btn w-12 h-14 rounded-2xl font-extrabold text-xs uppercase text-rose-300">BRK</button>
-      <button id="t-gas" class="touch-btn w-14 h-14 rounded-2xl font-extrabold text-xs uppercase text-emerald-300 border-emerald-500/40">GAS</button>
+    <div class="hx-pedal-row">
+      <button id="t-brake" class="hx-pedal hx-brake" aria-label="Brake"><span></span><span></span><span></span><span></span><em>BRAKE</em></button>
+      <button id="t-gas" class="hx-pedal hx-gas" aria-label="Accelerator"><span></span><span></span><span></span><span></span><span></span><em>GAS</em></button>
     </div>
   </div>
+</div>
 
-  <!-- BOTTOM RIGHT: MUSTANG DIGITAL SPEEDOMETER, RPM & ASPHALT 9 NITRO BAR -->
-  <div class="glass skew-card rounded-2xl p-4 sm:px-6 sm:py-4 border-r-4 border-r-orange-500 pointer-events-auto min-w-[250px] sm:min-w-[310px]">
-    <div class="unskew">
-      <!-- Car Badge -->
-      <div class="flex items-center justify-between mb-1">
-        <span class="text-[10px] font-extrabold uppercase tracking-widest text-orange-400 mono flex items-center gap-1.5">
-          <span id="hud-car-dot" class="inline-block w-2 h-2 rounded-full bg-orange-500"></span>
-          <span id="hud-car-name">MUSTANG SHELBY GT • 5.0L V8</span>
-        </span>
-        <span id="drift-badge" class="text-[10px] font-black uppercase px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-400/40 mono opacity-0 transition">
-          DRIFTING
-        </span>
-      </div>
-
-      <!-- Speed & Gear Row -->
-      <div class="flex items-baseline justify-between gap-4 my-1">
-        <div class="flex items-baseline gap-2">
-          <span id="hud-speed" class="text-5xl sm:text-6xl font-black italic tracking-tight text-white mono leading-none">000</span>
-          <span id="hud-unit" class="text-xs font-extrabold uppercase text-slate-400 mono">KM/H</span>
-        </div>
-        <div class="text-right">
-          <div class="text-[10px] font-bold uppercase text-slate-400 mono">GEAR</div>
-          <div id="hud-gear" class="text-2xl sm:text-3xl font-black text-orange-400 mono leading-none">1</div>
-        </div>
-      </div>
-
-      <!-- RPM Segmented Bar -->
-      <div class="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden border border-slate-700/80 p-0.5 mb-3">
-        <div id="hud-rpm-bar" class="h-full rounded-full bg-gradient-to-r from-sky-400 via-orange-500 to-rose-500 transition-all duration-75" style="width: 15%"></div>
-      </div>
-
-      <!-- Asphalt 9 Style Nitro / Shockwave Bar -->
-      <div>
-        <div class="flex items-center justify-between text-[10px] font-extrabold uppercase tracking-wider mono mb-1">
-          <span id="nitro-status-text" class="text-sky-300">⚡ NITRO CHARGE (SHIFT)</span>
-          <span id="nitro-pct-text" class="text-white">100%</span>
-        </div>
-        <div id="nitro-bar-wrap" class="w-full h-3.5 bg-slate-950 rounded-full overflow-hidden border border-slate-700 p-0.5 relative">
-          <!-- Shockwave threshold marker at 80% -->
-          <div class="absolute top-0 bottom-0 left-[80%] w-[2px] bg-white/70 z-10"></div>
-          <div id="hud-nitro-bar" class="h-full rounded-full bg-gradient-to-r from-amber-500 via-orange-500 to-fuchsia-500 transition-all duration-75" style="width: 100%"></div>
-        </div>
-      </div>
-    </div>
+<!-- quick menu (☰) -->
+<div id="hx-pop-backdrop" onclick="Game.toggleQuickMenu(false)"></div>
+<div id="hx-pop" class="glass" role="dialog" aria-label="Quick menu">
+  <div class="hx-pop-head"><span>QUICK MENU</span><span class="hx-paused">PAUSED</span><button onclick="Game.toggleQuickMenu(false)" aria-label="Close">✕</button></div>
+  <div class="hx-pop-grid">
+    <button onclick="Game.toggleQuickMenu(false); Game.openGarage()"><b>🏠</b>Main menu</button>
+    <button onclick="Game.cycleCamera()"><b>🎥</b><span id="cam-label">Chase Cam</span><kbd>V</kbd></button>
+    <button onclick="Game.cycleSkyPreset()"><b id="sky-icon">🌅</b><span id="sky-label">Sunset</span><kbd>L</kbd></button>
+    <button onclick="Game.cycleQuality()"><b>✨</b><span>Graphics: <span id="quality-label">High</span></span><kbd>G</kbd></button>
+    <button onclick="Game.toggleUnits()"><b>📏</b><span>Units: <span id="unit-btn-label">KM/H</span></span></button>
+    <button onclick="Game.toggleTransmission()"><b>⚙️</b><span>Gearbox: <span id="trans-label">Automatic</span></span></button>
+    <button onclick="Game.toggleQuickMenu(false); Game.resetCarToTrack()"><b>↺</b>Reset car<kbd>⌫</kbd></button>
+    <button onclick="Game.downloadGithubZip()"><b>📦</b>Export .ZIP</button>
   </div>
-</footer>
+  <div class="hx-vol">
+    <button onclick="Game.toggleAudio()"><span id="audio-icon">🔊</span></button>
+    <input id="vol-slider" type="range" min="0" max="150" value="125" oninput="Game.setVolume(this.value)" aria-label="Volume">
+  </div>
+  <div class="hx-keys">
+    <span><b>W/S</b> Gas / Brake</span><span><b>A/D</b> Steer</span><span><b>Space</b> Handbrake</span><span><b>Shift</b> Nitro</span>
+    <span><b>R / C</b> Shift up / down (manual)</span><span><b>V</b> Camera</span><span><b>⌫</b> Reset</span><span><b>Esc</b> This menu</span>
+  </div>
+</div>
+
 
 <!-- ==========================================
      INTERACTIVE 3D SHOWROOM GARAGE & START MODAL
@@ -401,7 +485,18 @@
           <div><div class="mx-stat-h"><span>NITRO BOOST</span><span id="stat-nit-lbl"></span></div><div class="mx-track"><div id="stat-nit-bar" style="background:#e879f9"></div></div></div>
         </div>
       </div>
-      <button class="mx-start" onclick="Game.confirmCar()">✓ USE THIS VEHICLE</button>
+      <button class="mx-start" onclick="Game.openTransPicker()">✓ USE THIS VEHICLE</button>
+    </div>
+    <div id="trans-modal" role="dialog" aria-label="Choose transmission">
+      <div class="tm-box">
+        <div class="mx-kicker">TRANSMISSION</div>
+        <div class="tm-title">How do you want to shift?</div>
+        <div class="tm-opts">
+          <button class="tm-opt" onclick="Game.confirmCar(false)"><div class="tm-ic">🅰️</div><div class="tm-n">AUTOMATIC</div><div class="tm-d">The gearbox shifts for you. Just steer, brake and accelerate.</div></button>
+          <button class="tm-opt" onclick="Game.confirmCar(true)"><div class="tm-ic">🕹️</div><div class="tm-n">MANUAL</div><div class="tm-d"><b>R</b> shifts up, <b>C</b> shifts down (▲ ▼ buttons on phones). Shift when the dial turns green.</div></button>
+        </div>
+        <button class="tm-cancel" onclick="Game.closeTransPicker()">Back to the garage</button>
+      </div>
     </div>
   </div>
 
@@ -2196,39 +2291,76 @@ const Game = window.Game = (function () {
   const currentPreset = () => (activeTrack.kind === 'desert' ? DESERT_PRESETS : SKY_PRESETS)[skyPresetIdx];
   let skyPresetIdx = 0;
 
-  /* ---------- 9. WEBAUDIO ENGINE SYNTH ---------- */
-  let audioCtx = null, masterGain = null, engineOsc1 = null, engineOsc2 = null, subOsc = null, turboOsc = null;
-  let engineGain = null, turboGain = null, driftGain = null, engineFilter = null, windGain = null;
-  let audioMuted = false, userVolume = 1.25, garageRevving = false, garageRpm = 0.18;
+  /* ---------- 9. WEBAUDIO ENGINE SYNTH: per-vehicle sound profiles ----------
+     k = engine-order: fundamental (Hz) = rpm / 60 * k   (V8 = 4, I6 = 3, V12 = 6, I4 = 2)
+     w / r / g = oscillator waveforms, frequency ratios and levels, am = firing-pulse "burble",
+     turbo / sc = turbo whistle / supercharger whine, bov = blow-off valve on upshifts, pops = overrun crackle */
+  const SOUND_PROFILES = {
+    mustang: { k: 4, idle: 750, w: ['sawtooth', 'square', 'sawtooth'], r: [1, 0.5, 2], g: [0.55, 0.62, 0.22], am: 0.45, amR: 0.5, drive: 3.2, f0: 230, fR: 1500, Q: 3.4, vol: 1.0, turbo: 0, sc: 0, bov: 0, pops: 1.0, lim: 16 },
+    bmw: { k: 3, idle: 800, w: ['sawtooth', 'sawtooth', 'triangle'], r: [1, 1.5, 2], g: [0.55, 0.36, 0.3], am: 0.12, amR: 1, drive: 2.3, f0: 380, fR: 2400, Q: 4.5, vol: 0.92, turbo: 0.05, sc: 0, bov: 0.7, pops: 0.6, lim: 19 },
+    bugatti: { k: 4, idle: 700, w: ['sawtooth', 'square', 'sine'], r: [1, 0.5, 0.25], g: [0.5, 0.5, 0.75], am: 0.22, amR: 0.25, drive: 2.6, f0: 260, fR: 1350, Q: 2.4, vol: 1.05, turbo: 0.075, sc: 0, bov: 1.0, pops: 0.2, lim: 14 },
+    huayra: { k: 6, idle: 850, w: ['triangle', 'sawtooth', 'sine'], r: [1, 2, 0.5], g: [0.7, 0.28, 0.42], am: 0.08, amR: 1, drive: 2.0, f0: 520, fR: 2800, Q: 5.0, vol: 0.95, turbo: 0.06, sc: 0, bov: 1.2, pops: 0.5, lim: 17 },
+    jesko: { k: 4, idle: 900, w: ['square', 'sawtooth', 'sawtooth'], r: [1, 2, 0.5], g: [0.42, 0.42, 0.32], am: 0.14, amR: 1, drive: 2.9, f0: 420, fR: 3000, Q: 4.0, vol: 0.95, turbo: 0.065, sc: 0, bov: 1.0, pops: 0.9, lim: 20 },
+    ninja: { k: 2, idle: 1300, w: ['sawtooth', 'square', 'triangle'], r: [1, 2, 4], g: [0.55, 0.32, 0.18], am: 0.18, amR: 1, drive: 2.6, f0: 600, fR: 3600, Q: 3.0, vol: 0.85, turbo: 0, sc: 0.05, bov: 0, pops: 0.35, lim: 26 }
+  };
+  let audioCtx = null, masterGain = null, comp = null, noiseBuf = null;
+  let oscs = [], oscGains = [], lfo = null, lfoGain = null, amGain = null, shaper = null, limOsc = null, limDepth = null, limGate = null, limActive = false, limPopT = 0;
+  let engineGain = null, turboOsc = null, turboGain = null, driftGain = null, engineFilter = null, windGain = null;
+  let audioMuted = false, userVolume = 1.25, garageRevving = false, garageRpm = 0.18, soundProfile = SOUND_PROFILES.mustang, lastLoad = 0, popCooldown = 0;
+
+  function shaperCurve(drive) {
+    const c = new Float32Array(512);
+    for (let i = 0; i < 512; i++) { const x = i / 255.5 - 1; c[i] = Math.tanh(x * drive) / Math.tanh(drive); }
+    return c;
+  }
+  function applySoundProfile() {
+    soundProfile = SOUND_PROFILES[CAR_SPECS[selectedCarIdx].id] || SOUND_PROFILES.mustang;
+    if (!audioCtx) return;
+    const p = soundProfile;
+    oscs.forEach((o, i) => { o.type = p.w[i]; oscGains[i].gain.value = p.g[i]; });
+    shaper.curve = shaperCurve(p.drive);
+    engineFilter.Q.value = p.Q;
+    amGain.gain.value = 1 - p.am; lfoGain.gain.value = p.am;
+  }
 
   function initAudio() {
     if (audioCtx) return;
     try {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const comp = audioCtx.createDynamicsCompressor();
+      comp = audioCtx.createDynamicsCompressor();
       comp.threshold.value = -14; comp.knee.value = 12; comp.ratio.value = 6; comp.attack.value = 0.003; comp.release.value = 0.15;
       masterGain = audioCtx.createGain();
       masterGain.gain.value = userVolume;
       comp.connect(masterGain); masterGain.connect(audioCtx.destination);
-      const shaper = audioCtx.createWaveShaper();
-      const curve = new Float32Array(256);
-      for (let i = 0; i < 256; i++) curve[i] = Math.tanh(((i * 2) / 256 - 1) * 2.4);
-      shaper.curve = curve;
-      engineFilter = audioCtx.createBiquadFilter();
-      engineFilter.type = 'lowpass'; engineFilter.frequency.value = 680; engineFilter.Q.value = 2.8;
+      shaper = audioCtx.createWaveShaper();
+      engineFilter = audioCtx.createBiquadFilter(); engineFilter.type = 'lowpass'; engineFilter.frequency.value = 600;
+      amGain = audioCtx.createGain();
       engineGain = audioCtx.createGain(); engineGain.gain.value = 0.0001;
-      engineOsc1 = audioCtx.createOscillator(); engineOsc2 = audioCtx.createOscillator(); subOsc = audioCtx.createOscillator();
-      engineOsc1.type = 'sawtooth'; engineOsc2.type = 'sawtooth'; subOsc.type = 'square';
-      engineOsc1.connect(shaper); engineOsc2.connect(shaper); subOsc.connect(shaper);
-      shaper.connect(engineFilter); engineFilter.connect(engineGain); engineGain.connect(comp);
-      engineOsc1.start(); engineOsc2.start(); subOsc.start();
+      for (let i = 0; i < 3; i++) {
+        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.connect(g); g.connect(shaper); o.start();
+        oscs.push(o); oscGains.push(g);
+      }
+      // Rev-limiter gate: engine -> limGate -> mix. A square wave (rounded by a low-pass so it thumps rather than clicks)
+      // swings the gate between ~0 and 1 while the ignition is being cut; otherwise depth is 0 and the gate stays open.
+      limGate = audioCtx.createGain(); limGate.gain.value = 1;
+      limOsc = audioCtx.createOscillator(); limOsc.type = 'square'; limOsc.frequency.value = 16;
+      const limSmooth = audioCtx.createBiquadFilter(); limSmooth.type = 'lowpass'; limSmooth.frequency.value = 160;
+      limDepth = audioCtx.createGain(); limDepth.gain.value = 0;
+      limOsc.connect(limSmooth); limSmooth.connect(limDepth); limDepth.connect(limGate.gain); limOsc.start();
+      shaper.connect(engineFilter); engineFilter.connect(amGain); amGain.connect(engineGain); engineGain.connect(limGate); limGate.connect(comp);
+      // firing-pulse amplitude modulation (the "burble" / lumpy idle)
+      lfo = audioCtx.createOscillator(); lfo.type = 'sine';
+      lfoGain = audioCtx.createGain();
+      lfo.connect(lfoGain); lfoGain.connect(amGain.gain); lfo.start();
       turboOsc = audioCtx.createOscillator(); turboOsc.type = 'sine';
       turboGain = audioCtx.createGain(); turboGain.gain.value = 0.0001;
       turboOsc.connect(turboGain); turboGain.connect(comp); turboOsc.start();
-      // Noise source shared by tyre squeal and wind/road roar
-      const nb = audioCtx.createBuffer(1, audioCtx.sampleRate * 2, audioCtx.sampleRate), nd = nb.getChannelData(0);
+      // Noise source shared by tyre squeal, wind, blow-off and pops
+      noiseBuf = audioCtx.createBuffer(1, audioCtx.sampleRate * 2, audioCtx.sampleRate);
+      const nd = noiseBuf.getChannelData(0);
       for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
-      const noise = audioCtx.createBufferSource(); noise.buffer = nb; noise.loop = true;
+      const noise = audioCtx.createBufferSource(); noise.buffer = noiseBuf; noise.loop = true;
       const sq = audioCtx.createBiquadFilter(); sq.type = 'bandpass'; sq.frequency.value = 1500; sq.Q.value = 7;
       driftGain = audioCtx.createGain(); driftGain.gain.value = 0.0001;
       noise.connect(sq); sq.connect(driftGain); driftGain.connect(comp);
@@ -2236,30 +2368,85 @@ const Game = window.Game = (function () {
       windGain = audioCtx.createGain(); windGain.gain.value = 0.0001;
       noise.connect(wf); wf.connect(windGain); windGain.connect(comp);
       noise.start();
+      applySoundProfile();
     } catch (e) {}
   }
 
-  function updateAudio(rpmNorm, slip, isActive, load = 1, speedN = 0) {
+  function setLimiter(on, now) {
+    if (!limGate || on === limActive) return;
+    limActive = on;
+    if (on) {
+      limOsc.frequency.setValueAtTime(soundProfile.lim * (0.92 + Math.random() * 0.16), now);
+      limGate.gain.setTargetAtTime(0.5, now, 0.004);       // gate swings 0.0 .. 1.0
+      limDepth.gain.setTargetAtTime(0.5, now, 0.004);
+      limPopT = 0.05;
+    } else {
+      limGate.gain.setTargetAtTime(1, now, 0.01);
+      limDepth.gain.setTargetAtTime(0, now, 0.01);
+    }
+  }
+  function noiseBurst(t0, dur, f0, f1, q, vol) {
+    const src = audioCtx.createBufferSource(); src.buffer = noiseBuf;
+    const bp = audioCtx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = q;
+    bp.frequency.setValueAtTime(f0, t0); bp.frequency.exponentialRampToValueAtTime(Math.max(40, f1), t0 + dur);
+    const g = audioCtx.createGain();
+    g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(vol, t0 + Math.min(0.012, dur * 0.2)); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    src.connect(bp); bp.connect(g); g.connect(comp);
+    src.start(t0, Math.random() * 1.5); src.stop(t0 + dur + 0.02);
+  }
+  function popBurst(n) {        // overrun crackle: a few sharp pops from the exhaust
+    const now = audioCtx.currentTime;
+    for (let i = 0; i < n; i++) noiseBurst(now + 0.03 + Math.random() * 0.45, 0.025 + Math.random() * 0.03, 900 + Math.random() * 1400, 300, 1.4, (0.18 + Math.random() * 0.25) * userVolume);
+  }
+  // Gear-change sound: driveline clunk, plus blow-off valve (turbo cars) on upshifts or a crackle on downshifts
+  function playShiftSound(dir, load) {
+    if (!audioCtx || audioMuted) return;
+    try {
+      const now = audioCtx.currentTime, p = soundProfile;
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.type = 'triangle';
+      o.frequency.setValueAtTime(dir > 0 ? 150 : 120, now); o.frequency.exponentialRampToValueAtTime(55, now + 0.07);
+      g.gain.setValueAtTime(0.22 * userVolume, now); g.gain.exponentialRampToValueAtTime(0.0001, now + 0.09);
+      o.connect(g); g.connect(comp); o.start(now); o.stop(now + 0.1);
+      noiseBurst(now, 0.05, 2600, 1200, 2.5, 0.06 * userVolume);                         // metallic click of the selector
+      if (dir > 0 && p.bov && load > 0.6) noiseBurst(now + 0.02, 0.32, 2600, 650, 1.6, 0.2 * p.bov * userVolume);   // pssshh
+      if (dir < 0 && p.pops > 0.4) popBurst(2 + Math.round(p.pops * 2));
+    } catch (e) {}
+  }
+
+  function updateAudio(rpmNorm, slip, isActive, load = 1, speedN = 0, limiter = false) {
     if (!audioCtx) return;
     const now = audioCtx.currentTime;
     if (audioMuted || !isActive) {
       for (const g of [engineGain, turboGain, driftGain, windGain]) if (g) g.gain.setTargetAtTime(0.0001, now, 0.05);
+      lastLoad = 0; setLimiter(false, now);
       return;
     }
     if (audioCtx.state === 'suspended') audioCtx.resume();
-    let f, f2mul, fbase, fgain, turbo = 0, tf = 0;
-    if (selectedCarIdx === 0) { f = 48 + rpmNorm * 180; f2mul = 1.505; fbase = 380; fgain = 1400; }
-    else if (selectedCarIdx === 1) { f = 62 + rpmNorm * 240; f2mul = 2.01; fbase = 520; fgain = 1850; turbo = 0.045; tf = 1400 + rpmNorm * 2200; }
-    else { f = 42 + rpmNorm * 200; f2mul = 1.333; fbase = 450; fgain = 1650; turbo = 0.065; tf = 1100 + rpmNorm * 2600; }
-    engineOsc1.frequency.setTargetAtTime(f, now, 0.025);
-    engineOsc2.frequency.setTargetAtTime(f * f2mul, now, 0.025);
-    subOsc.frequency.setTargetAtTime(f * 0.5, now, 0.025);
-    engineFilter.frequency.setTargetAtTime(fbase + rpmNorm * fgain * (0.45 + 0.55 * load), now, 0.04);
-    if (turbo) turboOsc.frequency.setTargetAtTime(tf, now, 0.04);
-    turboGain.gain.setTargetAtTime(Math.max(0.0001, rpmNorm * turbo * load), now, 0.08);
-    engineGain.gain.setTargetAtTime((0.15 + rpmNorm * 0.3) * (0.55 + 0.45 * load) * userVolume, now, 0.04);
+    const p = soundProfile, red = CAR_SPECS[selectedCarIdx].redline;
+    setLimiter(limiter, now);
+    // on the limiter the pitch is pinned at the cut-off rpm; it never keeps climbing
+    const rpm = limiter ? red * 0.985 : Math.max(p.idle, Math.min(rpmNorm, 0.985) * red), f = rpm / 60 * p.k;
+    oscs.forEach((o, i) => o.frequency.setTargetAtTime(f * p.r[i], now, 0.02));
+    lfo.frequency.setTargetAtTime(f * p.amR, now, 0.02);
+    engineFilter.frequency.setTargetAtTime(p.f0 + rpmNorm * p.fR * (0.4 + 0.6 * load), now, 0.035);
+    // turbo whistle / supercharger whine rise with boost (rpm x throttle)
+    if (p.turbo) {
+      turboOsc.frequency.setTargetAtTime(1500 + rpmNorm * 2600, now, 0.06);
+      turboGain.gain.setTargetAtTime(Math.max(0.0001, rpmNorm * rpmNorm * p.turbo * load * userVolume), now, 0.12);
+    } else if (p.sc) {
+      turboOsc.frequency.setTargetAtTime(f * 6.5, now, 0.02);
+      turboGain.gain.setTargetAtTime(Math.max(0.0001, rpmNorm * p.sc * (0.3 + 0.7 * load) * userVolume), now, 0.05);
+    } else turboGain.gain.setTargetAtTime(0.0001, now, 0.05);
+    engineGain.gain.setTargetAtTime((0.13 + rpmNorm * 0.3) * (0.5 + 0.5 * load) * p.vol * userVolume, now, 0.03);
     driftGain.gain.setTargetAtTime(Math.max(0.0001, clamp(slip, 0, 1) * 0.16 * userVolume), now, 0.05);
     windGain.gain.setTargetAtTime(Math.max(0.0001, speedN * speedN * 0.22 * userVolume), now, 0.1);
+    // the odd pop/bang from unburnt fuel while bouncing off the limiter
+    if (limiter && p.pops > 0.3) { limPopT -= 1 / 60; if (limPopT <= 0) { popBurst(1 + (Math.random() < p.pops * 0.5 ? 1 : 0)); limPopT = 0.18 + Math.random() * 0.35 / p.pops; } }
+    // overrun crackle when the throttle is snapped shut at high revs
+    popCooldown -= 1 / 60;
+    if (p.pops && lastLoad > 0.75 && load < 0.4 && rpmNorm > 0.5 && popCooldown <= 0 && Math.random() < p.pops) { popBurst(3 + Math.round(Math.random() * 4 * p.pops)); popCooldown = 0.8; }
+    lastLoad = load;
   }
 
   function playOneShot(kind, vol = 1) {
@@ -2283,6 +2470,11 @@ const Game = window.Game = (function () {
         osc.frequency.setValueAtTime(95, now); osc.frequency.exponentialRampToValueAtTime(38, now + 0.18);
         g.gain.setValueAtTime(0.35 * vol * userVolume, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
         osc.start(now); osc.stop(now + 0.22);
+      } else if (kind === 'deny') {
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(180, now); osc.frequency.setValueAtTime(140, now + 0.07);
+        g.gain.setValueAtTime(0.06 * userVolume, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+        osc.start(now); osc.stop(now + 0.16);
       } else if (kind === 'beep') {
         osc.type = 'square';
         osc.frequency.setValueAtTime(vol > 1 ? 880 : 440, now);
@@ -2317,7 +2509,7 @@ const Game = window.Game = (function () {
 
   function newCarState() {
     return { pos: [0, 0, 0], vel: [0, 0], yaw: 0, yawRate: 0, steer: 0, gear: 1, shiftT: 0, rpmN: 0.15, axS: 0, ayS: 0,
-      vx: 0, vy: 0, slipR: 0, slipF: 0, wheelspin: 0, surfMu: 1, surfDrag: 0, slope: 0, trkFwd: [0, 0, 1], load: 0, reverse: false };
+      vx: 0, vy: 0, slipR: 0, slipF: 0, shiftCount: 0, lastShiftDir: 0, shiftDenied: 0, blipT: 0, limiter: false, wheelspin: 0, surfMu: 1, surfDrag: 0, slope: 0, trkFwd: [0, 0, 1], load: 0, reverse: false };
   }
 
   // One fixed physics step. inp = { thr, brk, steer (-1..1, + = toward +right), hand, nitro (0|1|2) }
@@ -2349,21 +2541,36 @@ const Game = window.Game = (function () {
     else if (vx < 1.2 && brk > 0 && thr === 0) { rev = brk; brk = 0; }
     c.reverse = rev > 0 || vx < -0.6;
 
-    // --- gearbox ---
+    // --- gearbox: automatic, or manual with R / C ---
     if (c.shiftT > 0) c.shiftT -= h;
+    if (c.blipT > 0) c.blipT -= h;
+    const shiftTo = (g, dir) => { c.gear = g; c.shiftT = dir > 0 ? (inp.manual ? 0.1 : 0.14) : 0.08; c.shiftCount++; c.lastShiftDir = dir; if (dir < 0) c.blipT = 0.2; };
     let x = avx / ph.gearsV[c.gear - 1];
-    if (c.shiftT <= 0 && !c.reverse) {
-      if (x > 0.965 && c.gear < GEARS) { c.gear++; c.shiftT = 0.14; }
-      else if (c.gear > 1 && avx / ph.gearsV[c.gear - 2] < 0.70) { c.gear--; c.shiftT = 0.09; }
-      x = avx / ph.gearsV[c.gear - 1];
+    if (inp.manual) {
+      const req = inp.shift || 0;
+      if (req && !c.reverse) {
+        const ng = c.gear + req;
+        if (ng < 1 || ng > GEARS) c.shiftDenied++;
+        else if (req < 0 && avx / ph.gearsV[ng - 1] > 1.06) c.shiftDenied++;     // would over-rev the engine: refused
+        else shiftTo(ng, req);
+      }
+    } else if (c.shiftT <= 0 && !c.reverse) {
+      if (x > 0.965 && c.gear < GEARS) shiftTo(c.gear + 1, 1);
+      else if (c.gear > 1 && avx / ph.gearsV[c.gear - 2] < 0.70) shiftTo(c.gear - 1, -1);
     }
     if (c.reverse) c.gear = 1;
+    x = avx / ph.gearsV[c.gear - 1];
+    c.limiter = !c.reverse && x >= 0.995 && thr > 0;
     let drive = 0;
     if (c.shiftT <= 0 && x < 1.0) drive = thr * ph.K * torqueCurve(Math.max(x, 0.3)) / ph.gearsV[c.gear - 1] * ph.nitroMul[inp.nitro || 0];
     if (rev > 0 && vx > -13) drive = -rev * ph.K * 0.55 / ph.gearsV[0];
-    const targetRpm = clamp(Math.max(x, 0.14 + thr * (avx < 6 ? 0.35 : 0)), 0.14, 1.0);
-    c.rpmN += (targetRpm - c.rpmN) * Math.min(1, h * 14);
-    c.load = thr;
+    // engine braking when off the throttle (stronger in the low gears)
+    const engBrake = (thr === 0 && rev === 0 && c.shiftT <= 0 && avx > 2) ? ph.K * 0.09 * clamp(x, 0, 1.1) / ph.gearsV[c.gear - 1] : 0;
+    let targetRpm = clamp(Math.max(x, 0.14 + thr * (avx < 6 ? 0.35 : 0)), 0.14, 1.0);
+    if (c.limiter) targetRpm = 0.97 + 0.03 * Math.sin(c.limT = (c.limT || 0) + h * 70);    // bouncing off the limiter
+    if (c.shiftT > 0 && c.lastShiftDir > 0) targetRpm *= 0.97;
+    c.rpmN += (targetRpm - c.rpmN) * Math.min(1, h * (c.blipT > 0 ? 30 : 14));         // a downshift blips straight up to the new revs
+    c.load = c.blipT > 0.05 ? 1 : (c.shiftT > 0 && c.lastShiftDir > 0 ? 0.1 : thr);
 
     // --- longitudinal tyre forces with friction limits ---
     const dir = vx >= 0 ? 1 : -1;
@@ -2403,6 +2610,7 @@ const Game = window.Game = (function () {
     let Fx = FxF * cd - FyFw * sd + FxR;
     let Fy = FyFw * cd + FxF * sd + FyR;
     Fx -= ph.cd * vx * avx;                                              // aero drag
+    Fx -= dir * engBrake;
     if (avx > 0.3) Fx -= dir * (ph.rr + c.surfDrag * ph.mass);           // rolling / grass drag
     const along = fx * c.trkFwd[0] + fz * c.trkFwd[2];
     Fx -= ph.mass * GRAV * c.slope * along;                              // gradient
@@ -2467,7 +2675,7 @@ const Game = window.Game = (function () {
     player.pos = [n.p[0] + n.right[0] * lat, n.p[1] + 0.06, n.p[2] + n.right[2] * lat];
     player.yaw = n.yaw;
     player.vel = [0, 0]; player.yawRate = 0; player.steer = 0; player.speed = 0; player.vx = 0; player.vy = 0;
-    player.gear = 1; player.shiftT = 0; player.axS = 0; player.ayS = 0; player.pitch = 0; player.roll = 0;
+    player.gear = 1; player.shiftT = 0; player.blipT = 0; player.limiter = false; player.axS = 0; player.ayS = 0; player.pitch = 0; player.roll = 0;
     player.trackIdx = idx; player.lat = lat; player.skidPrev = [null, null]; player.drifting = false;
   }
 
@@ -2592,7 +2800,7 @@ const Game = window.Game = (function () {
   let camPos = [0, 6, -12], camTarget = [0, 1.5, 0], currentFov = 54 * Math.PI / 180, camYaw = 0, blurAmt = 0;
   const GRID_NODE = 3;
   const gridLat = () => -Math.min(3.2, ROAD_HALF_WIDTH * 0.5);
-  let progressDist = 0, lastTrackDist = 0, finishRun = null, scoreFrac = 0;
+  let progressDist = 0, lastTrackDist = 0, finishRun = null, scoreFrac = 0, transManual = false, gridRevs = 0.16;
 
   function placeRivalsOnGrid() {
     const gl0 = -gridLat(), lanes = [gl0, -gl0, gl0];
@@ -2677,8 +2885,9 @@ const Game = window.Game = (function () {
       camPos = [player.pos[0] + Math.sin(t) * orb * 1.25, player.pos[1] + 1.5 * orb / 6.6 + 0.4, player.pos[2] + Math.cos(t) * orb * 1.25];
       camTarget = [player.pos[0], player.pos[1] + 0.6 - lift, player.pos[2]];
       currentFov = 50 * Math.PI / 180; blurAmt = 0;
-      if (garageRevving) garageRpm = Math.min(0.96, garageRpm + dt * 2.2); else garageRpm = Math.max(0.18, garageRpm - dt * 1.6);
-      updateAudio(garageRpm, 0, garageRevving || garageRpm > 0.22, garageRevving ? 1 : 0.3, 0);
+      if (garageRevving) garageRpm = Math.min(1.0, garageRpm + dt * 2.2); else garageRpm = Math.max(0.18, garageRpm - dt * 1.6);
+      player.rpmN = garageRpm; player.limiter = garageRevving && garageRpm >= 0.995;
+      updateAudio(garageRpm, 0, garageRevving || garageRpm > 0.22, garageRevving ? 1 : 0.3, 0, player.limiter);
       return;
     }
 
@@ -2694,9 +2903,9 @@ const Game = window.Game = (function () {
         raceState = 'RACING';
         setTimeout(() => { cdOverlay.classList.add('hidden'); cdOverlay.classList.remove('flex'); }, 650);
       }
-      const gridRpm = keys.up ? 0.72 + Math.sin(performance.now() * 0.03) * 0.06 : 0.16;
-      player.rpmN = gridRpm;
-      updateAudio(gridRpm, 0, true, keys.up ? 1 : 0.2, 0);
+      gridRevs = keys.up ? Math.min(1, gridRevs + dt * 2.4) : Math.max(0.16, gridRevs - dt * 1.8);
+      player.rpmN = gridRevs; player.limiter = keys.up && gridRevs >= 0.995;
+      updateAudio(gridRevs, 0, true, keys.up ? 1 : 0.2, 0, player.limiter);
       playerMesh.updateTransform(player.pos, player.yaw, 0, 0, 0, 0, true, 0);
       camYaw = player.yaw;
       const cf = [Math.sin(camYaw), 0, Math.cos(camYaw)];
@@ -2739,11 +2948,14 @@ const Game = window.Game = (function () {
     } else player.nitro = Math.min(100, player.nitro + (2.2 + (Math.abs(player.speed) / 86) * 3.2) * dt);
 
     // Fixed-step vehicle dynamics (120 Hz+)
-    const inp = { thr: keys.up ? 1 : 0, brk: keys.down ? 1 : 0, steer: (keys.left ? 1 : 0) - (keys.right ? 1 : 0), hand: keys.drift, nitro: player.nitroMode };
+    const inp = { thr: keys.up ? 1 : 0, brk: keys.down ? 1 : 0, steer: (keys.left ? 1 : 0) - (keys.right ? 1 : 0), hand: keys.drift, nitro: player.nitroMode, manual: transManual, shift: shiftReq };
+    shiftReq = 0;
+    const prevShifts = player.shiftCount, prevDenied = player.shiftDenied;
     const steps = Math.max(1, Math.ceil(dt * 120)), h = dt / steps;
     let tf = null;
     for (let s = 0; s < steps; s++) {
       stepCar(player, ph, inp, h);
+      inp.shift = 0;
       tf = trackFrame(player.pos[0], player.pos[2], player.trackIdx, 30);
       player.trackIdx = tf.idx;
       playerWallAndSurface(tf);
@@ -2751,6 +2963,8 @@ const Game = window.Game = (function () {
       player.slope = tf.slope; player.trkFwd = tf.forward;
     }
     player.lat = tf.lat;
+    if (player.shiftCount !== prevShifts) playShiftSound(player.lastShiftDir, keys.up ? 1 : 0);
+    if (player.shiftDenied !== prevDenied) { playOneShot('deny'); if (shiftReqDir > 0) showCenterBanner('TOP GEAR', 'NO HIGHER GEAR'); else if (player.gear <= 1) showCenterBanner('FIRST GEAR', 'NO LOWER GEAR'); else showCenterBanner('TOO FAST', 'DOWNSHIFT WOULD OVER-REV'); }
     const spd = Math.hypot(player.vel[0], player.vel[1]);
     player.speed = player.vx;
     if (spd > player.topSpeedRecorded) player.topSpeedRecorded = spd;
@@ -2879,7 +3093,7 @@ const Game = window.Game = (function () {
       camTarget = [player.pos[0] + hf[0] * 20.0, player.pos[1] + 1.25 - player.pitch * 14, player.pos[2] + hf[2] * 20.0];
     }
 
-    updateAudio(player.rpmN, slipLvl * (player.offRoad ? 0.2 : 1), true, 0.25 + 0.75 * inp.thr, clamp(spd / 95, 0, 1));
+    updateAudio(player.rpmN, slipLvl * (player.offRoad ? 0.2 : 1), true, player.load, clamp(spd / 95, 0, 1), player.limiter && player.shiftT <= 0);
     updateHUD();
   }
 
@@ -2894,6 +3108,99 @@ const Game = window.Game = (function () {
     for (const rv of rivals) if (rv.totalDist > player.totalDist) pos++;
     return pos;
   }
+
+  /* ---- Dial speedometer: RPM sweep with red needle-arc, redline band, gear + digital speed in the centre ---- */
+  const dialCv = $('hud-dial'), dialCtx = dialCv.getContext('2d');
+  const DA0 = Math.PI * 0.75, DSW = Math.PI * 1.5;           // dial starts bottom-left and sweeps 270 degrees clockwise
+  let dialShiftFlash = 0;
+  function drawDial() {
+    const css = dialCv.clientWidth;
+    if (!css) return;
+    const dpr = Math.min(2, window.devicePixelRatio || 1), W = Math.round(css * dpr);
+    if (dialCv.width !== W) { dialCv.width = W; dialCv.height = W; }
+    const g = dialCtx, spec = CAR_SPECS[selectedCarIdx];
+    g.setTransform(W / 200, 0, 0, W / 200, 0, 0);
+    g.clearRect(0, 0, 200, 200);
+    const cx = 100, cy = 100, red = spec.redline, kSteps = red > 9000 ? 2000 : 1000;
+    const maxRpm = Math.ceil(red / kSteps) * kSteps + (red % kSteps === 0 ? kSteps : 0);
+    const fr = (rpm) => clamp(rpm / maxRpm, 0, 1), ang = (f) => DA0 + DSW * f;
+    const rpmNow = Math.max(raceState === 'RACING' || raceState === 'COUNTDOWN' ? 0 : 0, player.rpmN * red);
+    const fNow = fr(rpmNow), fRed = fr(red * 0.9);
+    const manual = transManual, upHint = manual && !player.reverse && player.gear < GEARS && player.rpmN > 0.9;
+    // face
+    let grd = g.createRadialGradient(cx, cy - 20, 10, cx, cy, 98);
+    grd.addColorStop(0, '#1b1f2a'); grd.addColorStop(1, '#050608');
+    g.fillStyle = grd; g.beginPath(); g.arc(cx, cy, 97, 0, Math.PI * 2); g.fill();
+    // chrome bezel
+    g.lineWidth = 3.2; g.strokeStyle = '#e5e7eb'; g.beginPath(); g.arc(cx, cy, 95.5, 0, Math.PI * 2); g.stroke();
+    g.lineWidth = 1; g.strokeStyle = 'rgba(255,255,255,.25)'; g.beginPath(); g.arc(cx, cy, 92, 0, Math.PI * 2); g.stroke();
+    // redline band (white like the reference, glowing red when you hit it)
+    g.lineWidth = 6; g.strokeStyle = player.limiter ? '#ff2d3a' : '#f1f5f9';
+    g.beginPath(); g.arc(cx, cy, 86, ang(fRed), ang(1)); g.stroke();
+    // rpm sweep track + red fill
+    g.lineCap = 'butt';
+    g.lineWidth = 15; g.strokeStyle = 'rgba(255,255,255,.06)';
+    g.beginPath(); g.arc(cx, cy, 75, ang(0), ang(1)); g.stroke();
+    if (fNow > 0.002) {
+      const gr = g.createLinearGradient(20, 180, 180, 20);
+      gr.addColorStop(0, '#7f0d14'); gr.addColorStop(0.6, '#e11d2a'); gr.addColorStop(1, '#ff4d4d');
+      g.shadowColor = 'rgba(255,40,50,.9)'; g.shadowBlur = player.limiter ? 16 : 9;
+      g.strokeStyle = gr; g.beginPath(); g.arc(cx, cy, 75, ang(0), ang(fNow)); g.stroke();
+      g.shadowBlur = 0;
+    }
+    // ticks & numerals
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    for (let r = 0; r <= maxRpm + 1; r += kSteps / 2) {
+      const a = ang(fr(r)), major = r % kSteps === 0, c = Math.cos(a), s = Math.sin(a);
+      g.strokeStyle = r >= red * 0.9 ? '#fca5a5' : '#e5e7eb'; g.lineWidth = major ? 2.4 : 1.2;
+      const r0 = major ? 62 : 66;
+      g.beginPath(); g.moveTo(cx + c * r0, cy + s * r0); g.lineTo(cx + c * 69, cy + s * 69); g.stroke();
+      if (major) {
+        g.fillStyle = r >= red * 0.9 ? '#fca5a5' : '#f8fafc';
+        g.font = 'italic 800 12px Inter, system-ui, sans-serif';
+        g.fillText(String(r / 1000), cx + c * 51, cy + s * 51);
+      }
+    }
+    // shift lights + "SHIFT" label
+    dialShiftFlash = upHint ? dialShiftFlash + 1 : 0;
+    const on = upHint && (dialShiftFlash % 10) < 6;
+    g.font = '700 7px "JetBrains Mono", ui-monospace, monospace';
+    g.fillStyle = on ? '#4ade80' : 'rgba(255,255,255,.45)';
+    g.fillText(manual ? 'SHIFT' : 'AUTO', cx, cy - 37);
+    for (const sx of [-1, 1]) {
+      g.fillStyle = on ? '#22c55e' : 'rgba(34,197,94,.18)';
+      g.beginPath(); g.moveTo(cx + sx * 20 - 4, cy - 34); g.lineTo(cx + sx * 20 + 4, cy - 34); g.lineTo(cx + sx * 20, cy - 41); g.closePath(); g.fill();
+    }
+    // gear: "M-5" (manual) / "D-5" (auto) / "R" / "N"
+    const spd = Math.hypot(player.vel[0], player.vel[1]);
+    const gearTxt = player.reverse ? 'R' : (spd < 0.5 && raceState !== 'RACING') ? 'N' : (manual ? 'M-' : 'D-') + player.gear;
+    g.fillStyle = '#ffffff'; g.font = 'italic 900 30px Inter, system-ui, sans-serif';
+    g.fillText(gearTxt, cx, cy - 8);
+    g.strokeStyle = 'rgba(255,255,255,.85)'; g.lineWidth = 1.2;
+    g.beginPath(); g.moveTo(cx - 34, cy + 9); g.lineTo(cx + 34, cy + 9); g.stroke();
+    // digital speed in red
+    const v = Math.round(spd * (useMph ? 2.237 : 3.6));
+    g.fillStyle = '#ff3b3b'; g.shadowColor = 'rgba(255,40,40,.7)'; g.shadowBlur = 6;
+    g.font = '700 28px "JetBrains Mono", ui-monospace, monospace';
+    g.fillText(String(v), cx, cy + 30);
+    g.shadowBlur = 0;
+    g.fillStyle = 'rgba(252,165,165,.8)'; g.font = '700 7px "JetBrains Mono", ui-monospace, monospace';
+    g.fillText(useMph ? 'MPH' : 'KM/H', cx, cy + 47);
+    // nitro gauge in the bottom gap
+    const n = clamp(player.nitro / 100, 0, 1), nA0 = Math.PI * 0.72, nA1 = Math.PI * 0.28;
+    g.lineCap = 'round'; g.lineWidth = 4.5; g.strokeStyle = 'rgba(255,255,255,.1)';
+    g.beginPath(); g.arc(cx, cy, 86, nA0, nA1, true); g.stroke();
+    if (n > 0.01) {
+      g.strokeStyle = player.nitroMode === 2 ? '#e879f9' : n >= 0.8 ? '#fbbf24' : '#38bdf8';
+      if (n >= 0.8 || player.nitroMode) { g.shadowColor = g.strokeStyle; g.shadowBlur = 8; }
+      g.beginPath(); g.arc(cx, cy, 86, nA0, nA0 - (nA0 - nA1) * n, true); g.stroke();
+      g.shadowBlur = 0;
+    }
+    g.lineCap = 'butt';
+    g.fillStyle = player.nitroMode === 2 ? '#f0abfc' : n >= 0.8 ? '#fde68a' : 'rgba(186,230,253,.8)';
+    g.font = '800 7px "JetBrains Mono", ui-monospace, monospace';
+    g.fillText(player.nitroMode === 2 ? 'SHOCKWAVE' : n >= 0.8 ? 'N₂O READY' : 'N₂O ' + Math.round(n * 100) + '%', cx, cy + 76);
+  }
   const hudCache = {};
   function setText(id, v) { if (hudCache[id] !== v) { hudCache[id] = v; $(id).textContent = v; } }
   function updateHUD() {
@@ -2905,26 +3212,12 @@ const Game = window.Game = (function () {
     const lapLen = TRACK_CLOSED ? totalTrackLength : activeTrack.finishDist;
     setText('hud-lap-pct', `${clamp(Math.round(wrapDist(lastTrackDist) / lapLen * 100), 0, 100)}%`);
     const spd = Math.hypot(player.vel[0], player.vel[1]);
-    setText('hud-speed', String(Math.round(spd * (useMph ? 2.237 : 3.6))).padStart(3, '0'));
-    setText('hud-unit', useMph ? 'MPH' : 'KM/H');
-    setText('hud-gear', player.reverse ? 'R' : (spd < 0.5 && raceState !== 'RACING' ? 'N' : player.gear));
-    $('hud-rpm-bar').style.width = `${Math.round(player.rpmN * 100)}%`;
+    drawDial();
     const badge = $('drift-badge');
     badge.style.opacity = (player.drifting || player.offRoad) ? '1' : '0';
     setText('drift-badge', player.offRoad ? 'OFF TRACK' : 'DRIFTING');
     $('fx-vignette').style.opacity = player.nitroMode === 2 ? '1' : player.nitroMode === 1 ? '0.6' : (spd * 3.6 > 275 ? '0.35' : '0');
 
-    const nPct = Math.round(player.nitro);
-    setText('nitro-pct-text', `${nPct}%`);
-    $('hud-nitro-bar').style.width = `${nPct}%`;
-    const nStatus = $('nitro-status-text'), nWrap = $('nitro-bar-wrap');
-    const st = player.nitroMode === 2 ? 2 : nPct >= 80 ? 1 : 0;
-    if (hudCache.nst !== st) {
-      hudCache.nst = st;
-      if (st === 2) { nStatus.textContent = '💜 SHOCKWAVE NITRO ACTIVE!'; nStatus.className = 'text-fuchsia-400 font-black'; nWrap.classList.add('shockwave-ready'); }
-      else if (st === 1) { nStatus.textContent = '🔥 SHOCKWAVE READY! (PRESS SHIFT)'; nStatus.className = 'text-amber-300 font-black'; nWrap.classList.add('shockwave-ready'); }
-      else { nStatus.textContent = '⚡ NITRO CHARGE (DRIFT TO FILL)'; nStatus.className = 'text-sky-300'; nWrap.classList.remove('shockwave-ready'); }
-    }
     const skillBox = $('skill-box');
     if (player.chainPts > 0 && player.chainTimer > 0) {
       skillBox.style.opacity = '1'; skillBox.style.transform = 'scale(1)';
@@ -3168,6 +3461,7 @@ const Game = window.Game = (function () {
     $('stat-hnd-lbl').textContent = s.stats.hnd; $('stat-hnd-bar').style.width = s.stats.hndW;
     $('stat-nit-lbl').textContent = s.stats.nit; $('stat-nit-bar').style.width = s.stats.nitW;
     document.querySelectorAll('#car-cards .mx-card').forEach((el, i) => el.classList.toggle('sel', i === idx));
+    applySoundProfile();
     if (silent) return;
     initAudio();
     garageRevving = true;
@@ -3186,7 +3480,7 @@ const Game = window.Game = (function () {
   }
   function refreshHome() {
     const cp = $('home-car-pick'), ep = $('home-env-pick');
-    cp.textContent = carPicked ? '✓ ' + CAR_SPECS[selectedCarIdx].short : 'No vehicle chosen';
+    cp.textContent = carPicked ? '✓ ' + CAR_SPECS[selectedCarIdx].short + (transManual ? ' · MANUAL' : ' · AUTO') : 'No vehicle chosen';
     ep.textContent = envPicked ? '✓ ' + TRACKS[envIdx].name : 'No environment chosen';
     cp.classList.toggle('mx-pick-empty', !carPicked); ep.classList.toggle('mx-pick-empty', !envPicked);
     const ready = carPicked && envPicked;
@@ -3204,6 +3498,7 @@ const Game = window.Game = (function () {
     $('countdown-overlay').classList.add('hidden'); $('countdown-overlay').classList.remove('flex');
     $('start-modal').style.display = '';
     for (const p of ['home', 'garage', 'env']) $('menu-' + p).style.display = p === page ? '' : 'none';
+    closeTransPicker(); toggleQuickMenu(false);
     resetPlayerToNode(GRID_NODE, 0);
     placeRivalsOnGrid();
     refreshHome();
@@ -3222,7 +3517,19 @@ const Game = window.Game = (function () {
     hudCache['hud-cp'] = null;
   }
   function selectEnv(i) { applyEnv(i); envPicked = true; showMenu('home'); }
-  function confirmCar() { carPicked = true; showMenu('home'); }
+  function openTransPicker() { $('trans-modal').classList.add('show'); }
+  function closeTransPicker() { $('trans-modal').classList.remove('show'); }
+  function setTransmission(manual) {
+    transManual = !!manual;
+    document.body.classList.toggle('manual-trans', transManual);
+    $('trans-label').textContent = transManual ? 'Manual' : 'Automatic';
+    try { localStorage.setItem('apex_manual', transManual ? '1' : '0'); } catch (e) {}
+  }
+  function toggleTransmission() {
+    setTransmission(!transManual);
+    if (raceState === 'RACING' || raceState === 'COUNTDOWN') showCenterBanner(transManual ? 'MANUAL GEARBOX' : 'AUTOMATIC GEARBOX', transManual ? 'R = UP · C = DOWN' : 'GEARS SHIFT FOR YOU');
+  }
+  function confirmCar(manual) { setTransmission(manual); closeTransPicker(); carPicked = true; showMenu('home'); }
   function openGarage() { showMenu('home'); }
 
   function startRace() {
@@ -3240,7 +3547,7 @@ const Game = window.Game = (function () {
     skidCount = 0; skidHead = 0; particles.length = 0;
     placeRivalsOnGrid();
     camYaw = player.yaw;
-    raceState = 'COUNTDOWN';
+    raceState = 'COUNTDOWN'; gridRevs = 0.16;
     countdownTimer = 3.0; lastCdSec = 4;
     const cdOverlay = $('countdown-overlay');
     cdOverlay.classList.remove('hidden'); cdOverlay.classList.add('flex');
@@ -3267,9 +3574,10 @@ const Game = window.Game = (function () {
     modal.classList.remove('hidden'); modal.classList.add('flex');
   }
 
-  const GAME_KEYS = new Set(['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space']);
+  const GAME_KEYS = new Set(['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'Backspace']);
   window.addEventListener('keydown', (e) => {
     const k = e.code;
+    if (e.target && /^(INPUT|TEXTAREA)$/.test(e.target.tagName) && e.target.type !== 'range') return;
     if (GAME_KEYS.has(k)) e.preventDefault();
     if (k === 'KeyW' || k === 'ArrowUp') keys.up = true;
     if (k === 'KeyS' || k === 'ArrowDown') keys.down = true;
@@ -3282,9 +3590,12 @@ const Game = window.Game = (function () {
       lastNitroTap = now; keys.nitro = true;
       triggerNitro(doubleTap);
     }
-    if (k === 'KeyC') cycleCamera();
+    if (k === 'Escape') { if (raceState === 'RACING' || raceState === 'COUNTDOWN') toggleQuickMenu(); return; }
+    if (k === 'KeyR') requestShift(1);
+    if (k === 'KeyC') requestShift(-1);
+    if (k === 'KeyV') cycleCamera();
     if (k === 'KeyL') cycleSkyPreset();
-    if (k === 'KeyR') resetCarToTrack();
+    if (k === 'Backspace') resetCarToTrack();
     if (k === 'KeyM') toggleAudio();
     if (k === 'KeyG') cycleQuality();
   });
@@ -3308,6 +3619,29 @@ const Game = window.Game = (function () {
   }
   bindTouch('t-left', 'left'); bindTouch('t-right', 'right'); bindTouch('t-gas', 'up'); bindTouch('t-brake', 'down');
   bindTouch('t-drift', 'drift'); bindTouch('t-nitro', 'nitro', () => triggerNitro(true));
+  for (const [id, dir] of [['t-up', 1], ['t-down', -1]]) {
+    const el = $(id);
+    el.addEventListener('pointerdown', (e) => { e.preventDefault(); el.classList.add('active'); requestShift(dir); });
+    for (const ev of ['pointerup', 'pointerleave', 'pointercancel']) el.addEventListener(ev, () => el.classList.remove('active'));
+  }
+  // Manual gearbox requests are consumed by the next physics step
+  let shiftReq = 0, shiftReqDir = 0;
+  function requestShift(dir) {
+    if (!transManual || raceState !== 'RACING' || paused) return;
+    shiftReq = dir; shiftReqDir = dir;
+  }
+  // Quick menu (☰) pauses the race while it is open
+  let paused = false;
+  function toggleQuickMenu(force) {
+    const open = typeof force === 'boolean' ? force : !document.body.classList.contains('qm-open');
+    document.body.classList.toggle('qm-open', open);
+    paused = open && (raceState === 'RACING' || raceState === 'COUNTDOWN');
+    if (open) for (const k in keys) keys[k] = false;
+    if (paused) updateAudio(0, 0, false);
+  }
+  // Touch controls on phones / tablets
+  const isTouchUI = () => ('ontouchstart' in window) || navigator.maxTouchPoints > 0 || window.matchMedia('(pointer: coarse)').matches;
+  document.body.classList.toggle('touch-ui', isTouchUI());
 
   function cycleCamera() { camMode = (camMode + 1) % 3; $('cam-label').textContent = ['Chase Cam', 'Action Cam', 'Hood Cam'][camMode]; }
   function cycleSkyPreset() {
@@ -3353,6 +3687,7 @@ const Game = window.Game = (function () {
   }
 
   // Initial UI state
+  { let m = false; try { m = localStorage.getItem('apex_manual') === '1'; } catch (e) {} setTransmission(m); }
   buildMenuCards();
   applyEnv(0);
   selectCar(0, true);
@@ -3364,19 +3699,19 @@ const Game = window.Game = (function () {
   function loop(now) {
     const dt = lastFrame ? Math.min(0.05, (now - lastFrame) / 1000) : 0.016;
     lastFrame = now;
-    updatePhysics(dt);
+    if (!paused) updatePhysics(dt);
     renderScene();
     requestAnimationFrame(loop);
   }
   requestAnimationFrame(loop);
 
   return {
-    startRace, restartRace: startRace, openGarage, showMenu, selectEnv, confirmCar, selectCar, revGarageEngine, cycleCamera, cycleSkyPreset, cycleQuality,
+    startRace, restartRace: startRace, openGarage, showMenu, selectEnv, confirmCar, openTransPicker, closeTransPicker, toggleTransmission, toggleQuickMenu, selectCar, revGarageEngine, cycleCamera, cycleSkyPreset, cycleQuality,
     toggleUnits, toggleAudio, setVolume, resetCarToTrack, downloadGithubZip,
     // test / debug hooks
     _dbg: { player, rivals, keys, TRACKS, CAR_SPECS, PHYS, stepCar, newCarState, trackFrame, sampleTrack, roadDist, sceneObjects, setQuality,
       track: () => activeTrack, ai: () => ({ aiSpeed, aiLine }), state: () => raceState, tick: (dt) => updatePhysics(dt), total: () => totalTrackLength,
-      pick: (c, e) => { selectCar(c, true); carPicked = true; applyEnv(e); envPicked = true; garageRevving = false; } }
+      shift: requestShift, setManual: setTransmission, isPaused: () => paused, pick: (c, e) => { selectCar(c, true); carPicked = true; applyEnv(e); envPicked = true; garageRevving = false; } }
   };
 })();
 </script>
