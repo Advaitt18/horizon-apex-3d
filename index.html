@@ -118,7 +118,7 @@
   .mx-env { padding: 0; text-align: left; border-radius: 20px; overflow: hidden; border: 2px solid #334155; background: rgba(15, 23, 42, .9); color: #fff; cursor: pointer; transition: border-color .15s, transform .15s; }
   .mx-env:hover { border-color: #f97316; transform: translateY(-2px); }
   .mx-env.sel { border-color: #34d399; }
-  .mx-env-art { height: 170px; position: relative; overflow: hidden; }
+  .mx-env-art { height: 128px; position: relative; overflow: hidden; }
   .mx-art-circuit { background: linear-gradient(#7fb4e6 0%, #cfe3f2 46%, #4f8f3f 46.5%, #2f6b2b 100%); }
   .mx-art-desert { background: linear-gradient(#f2a65a 0%, #f7d9a6 50%, #d9a45f 50.5%, #b97f43 100%); }
   .mx-art-road { position: absolute; left: 50%; bottom: 0; width: 46%; height: 50%; transform: translateX(-50%); background: #33363d; clip-path: polygon(46% 0, 54% 0, 100% 100%, 0 100%); }
@@ -129,6 +129,11 @@
   .mx-art-desert::before { content: ''; position: absolute; left: 6%; top: 30%; width: 26%; height: 21%; background: #a8552f; clip-path: polygon(8% 100%, 14% 18%, 86% 18%, 94% 100%); box-shadow: none; }
   .mx-art-desert::after { content: ''; position: absolute; right: 9%; top: 36%; width: 16%; height: 15%; background: #b5633a; clip-path: polygon(10% 100%, 18% 14%, 82% 14%, 90% 100%); }
   .mx-env-body { padding: 14px 16px 16px; }
+  .mx-env-sec { grid-column: 1 / -1; text-align: left; font: 800 11px/1 'JetBrains Mono', ui-monospace, monospace; letter-spacing: .2em; color: #94a3b8; margin-top: 4px; }
+  .mx-fr-badge, .mx-race-badge { position: absolute; top: 10px; left: 10px; padding: 4px 9px; border-radius: 99px; font: 800 10px/1.2 'JetBrains Mono', ui-monospace, monospace; color: #fff; background: rgba(2,6,23,.7); border: 1px solid rgba(255,255,255,.25); }
+  .mx-fr-badge { color: #6ee7b7; border-color: rgba(52,211,153,.5); }
+  .mx-env.sel { box-shadow: 0 0 0 1px #34d399, 0 8px 24px rgba(52,211,153,.2); }
+  @media (max-width: 640px), (max-height: 520px) { .mx-envs { grid-template-columns: 1fr 1fr; } .mx-env-art { height: 84px; } .mx-env-name { font-size: 15px; } .mx-env-sub { font-size: 11px; } }
   .mx-env-name { font-size: 20px; font-weight: 900; font-style: italic; }
   .mx-env-sub { font-size: 13px; color: #94a3b8; margin-top: 3px; }
   @media (max-width: 640px) {
@@ -140,7 +145,7 @@
   }
   @media (max-height: 520px) {
     .mx-desc { display: none; } .mx-detail { grid-template-columns: 1fr; padding: 8px 10px; } .mx-card-sub { display: none; }
-    .mx-cards { grid-template-columns: repeat(6, 1fr); } .mx-card { padding: 7px 8px; } .mx-card-name { font-size: 11px; }
+    .mx-cards { grid-template-columns: repeat(7, 1fr); } .mx-card { padding: 7px 8px; } .mx-card-name { font-size: 11px; }
     .mx-start { padding: 10px; font-size: 14px; } .mx-lead { display: none; } .mx-tile { padding: 12px; } .mx-tile-icon { font-size: 22px; }
     .mx-env-art { height: 90px; }
   }
@@ -165,7 +170,7 @@
   #hud-dial { width: 236px; height: 236px; display: block; filter: drop-shadow(0 8px 24px rgba(0,0,0,.55)); }
   .hx-dial-tags { display: flex; gap: 6px; align-items: center; justify-content: center; flex-wrap: wrap; }
   .hx-car { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 99px; background: rgba(2,6,23,.7);
-    border: 1px solid rgba(255,255,255,.12); font: 800 10px/1.3 'JetBrains Mono', ui-monospace, monospace; color: #fdba74; letter-spacing: .05em; white-space: nowrap; }
+    border: 1px solid rgba(255,255,255,.12); font: 800 10px/1.3 "JetBrains Mono", ui-monospace, monospace; color: #fdba74; letter-spacing: .05em; white-space: nowrap; max-width: 236px; overflow: hidden; text-overflow: ellipsis; }
   #hud-car-dot { width: 8px; height: 8px; border-radius: 50%; background: #f97316; }
   #drift-badge { opacity: 0; transition: opacity .15s; padding: 3px 8px; border-radius: 6px; font: 900 10px/1.3 'JetBrains Mono', ui-monospace, monospace;
     color: #fcd34d; background: rgba(245,158,11,.2); border: 1px solid rgba(251,191,36,.4); }
@@ -269,6 +274,8 @@
     .hx-pop-grid button { flex-direction: column; align-items: flex-start; gap: 4px; padding: 8px; font-size: 12px; }
     #hx-pop { width: min(560px, calc(100vw - 28px)); right: 50%; transform: translateX(50%); }
   }
+  /* free roam: no position / lap card */
+  body.free-roam header > div:first-child { visibility: hidden; }
   body.menu-open #hx-hud, body.menu-open #hx-pop { display: none !important; }
 </style>
 </head>
@@ -449,13 +456,13 @@
         <button class="mx-tile" onclick="Game.showMenu('garage')">
           <div class="mx-tile-icon">🏎️</div>
           <div class="mx-tile-name">GARAGE</div>
-          <div class="mx-tile-sub">5 cars and 1 superbike</div>
+          <div class="mx-tile-sub">6 cars and 1 superbike</div>
           <div id="home-car-pick" class="mx-pick mx-pick-empty">No vehicle chosen</div>
         </button>
         <button class="mx-tile" onclick="Game.showMenu('env')">
           <div class="mx-tile-icon">🗺️</div>
           <div class="mx-tile-name">ENVIRONMENTS</div>
-          <div class="mx-tile-sub">Circuit or desert highway</div>
+          <div class="mx-tile-sub">2 races · 2 free-roam worlds</div>
           <div id="home-env-pick" class="mx-pick mx-pick-empty">No environment chosen</div>
         </button>
       </div>
@@ -867,9 +874,9 @@ const Game = window.Game = (function () {
 
   const TRACKS = [
     buildTrack({ id: 'circuit', kind: 'circuit', name: 'HORIZON APEX CIRCUIT', sub: '4.1 km · 3 laps · hills, forest & a hairpin', points: CIRCUIT_POINTS, samples: 1400,
-      hw: 10.5, kerb: 1.5, wall: 18, laps: 3, gold: 300, aiCap: 92, aiPower: 520000 }),
+      hw: 10.5, kerb: 1.5, wall: 18, laps: 3, gold: 300, aiCap: 92, aiPower: 520000, worldName: 'HORIZON VALLEY', bounds: [45 - 990, -60 - 990, 45 + 990, -60 + 990] }),
     buildTrack({ id: 'desert', kind: 'desert', name: 'DESERT HIGHWAY', sub: '5 km sprint · dead-straight 2-lane road', closed: false, length: 6000, finishDist: 5000,
-      hw: 4.6, kerb: 1.3, wall: 11.5, laps: 1, gold: 70, aiCap: 106, aiPower: 760000 })
+      hw: 4.6, kerb: 1.3, wall: 11.5, laps: 1, gold: 70, aiCap: 106, aiPower: 760000, worldName: 'MOJAVE DESERT', bounds: [-1440, -650, 1440, 6650] })
   ];
 
   /* ---------- 4. WEBGL2 SHADERS (PBR + CSM SHADOWS, SKY, POST, PARTICLES) ---------- */
@@ -1543,7 +1550,34 @@ const Game = window.Game = (function () {
       const a = j * W + i, b = a + 1, c = a + W, d = c + 1;
       I.push(a, c, b, b, c, d);
     }
+    activeTrack.terrainGrid = { x0: cx - sx / 2, z0: cz - sz / 2, stx, stz, W, D: dzz + 1, H };
     return { p: P, n: N, c: C, i: I };
+  }
+
+  // Height of the rendered terrain mesh (same triangle split as the index buffer)
+  function meshHeightAt(x, z) {
+    const t = activeTrack.terrainGrid;
+    const fx = clamp((x - t.x0) / t.stx, 0, t.W - 1.001), fz = clamp((z - t.z0) / t.stz, 0, t.D - 1.001);
+    const i = Math.floor(fx), j = Math.floor(fz), u = fx - i, v = fz - j, H = t.H, W = t.W;
+    const ha = H[j * W + i], hb = H[j * W + i + 1], hc = H[(j + 1) * W + i], hd = H[(j + 1) * W + i + 1];
+    return (u + v <= 1) ? ha + (hb - ha) * u + (hc - ha) * v : hd + (hc - hd) * (1 - u) + (hb - hd) * (1 - v);
+  }
+  // Solid scenery for free roam: circles in a 24 m spatial hash
+  const COL_CELL = 24;
+  function addCollider(x, z, r) {
+    const t = activeTrack;
+    if (!t.colliders) t.colliders = new Map();
+    const k = gridKey(Math.floor(x / COL_CELL), Math.floor(z / COL_CELL));
+    if (!t.colliders.has(k)) t.colliders.set(k, []);
+    t.colliders.get(k).push([x, z, r]);
+    t.colliderCount = (t.colliderCount || 0) + 1;
+  }
+  function forEachColliderNear(x, z, reach, fn) {
+    const m = activeTrack.colliders;
+    if (!m) return;
+    const c0 = Math.floor((x - reach) / COL_CELL), c1 = Math.floor((x + reach) / COL_CELL);
+    const d0 = Math.floor((z - reach) / COL_CELL), d1 = Math.floor((z + reach) / COL_CELL);
+    for (let a = c0; a <= c1; a++) for (let b = d0; b <= d1; b++) { const cell = m.get(gridKey(a, b)); if (cell) for (const c of cell) fn(c); }
   }
 
   /* ---------- 6. SCENE GRAPH ---------- */
@@ -1575,6 +1609,7 @@ const Game = window.Game = (function () {
     for (const side of [-1, 1]) {
       const p = offPt(node, side * (WALL_OFFSET + 1.3), 0);
       g.add(G_BOX, trs([p[0], p[1] + 4.6, p[2]], [0, yaw, 0], [1.2, 9.6, 1.2]), [0.16, 0.17, 0.19]);
+      addCollider(p[0], p[2], 0.9);
     }
     const archBar = addObj(M_BOX, { color: [0.12, 0.13, 0.16], rough: 0.4, metal: 0.5 });
     setModel(archBar, trs([node.p[0], node.p[1] + 9.2, node.p[2]], [0, yaw, 0], [WALL_OFFSET * 2 + 3.8, 1.3, 1.3]));
@@ -1589,7 +1624,7 @@ const Game = window.Game = (function () {
     addObj(createMesh(buildTerrainGeo(TERRAIN_C[0], TERRAIN_C[1], 2100, 2100, 240, 240)), { detail: 1, rough: 0.95, cast: false });
     addObj(createMesh(buildVergeGeo()), { detail: 1, rough: 0.95, cast: false });
     addObj(createMesh(buildRoadGeo()), { detail: 2, rough: 0.62, cast: false });
-    addObj(createMesh(buildBarrierGeo()), { rough: 0.42, metal: 0.75 });
+    addObj(createMesh(buildBarrierGeo()), { rough: 0.42, metal: 0.75, barrier: true });
 
     // ---- Batched static props. Every prop is tested against the WHOLE circuit, not just its own section. ----
     const gMatte = new Geo(), gLamp = new Geo();
@@ -1607,6 +1642,7 @@ const Game = window.Game = (function () {
           const lat = side * (lat0 + t * 1.35 + 0.67), hgt = 0.9 + t * 0.75;
           const p = offPt(n, lat, hgt / 2 - 0.4);
           gMatte.add(G_BOX, trs(p, [0, yaw, 0], [1.35, hgt + 0.8, 16]), [0.36, 0.37, 0.4]);
+          if (t % 2 === 0) for (const e of [-6.4, -2.1, 2.1, 6.4]) addCollider(p[0] + n.forward[0] * e, p[2] + n.forward[2] * e, 2.3);
           for (let s = 0; s < 15; s++) {
             if (hash2(k * 31 + t * 7 + s, side * 3 + t) < 0.14) continue;
             const along = -7.2 + s * 1.03 + (hash2(s, t + k) - 0.5) * 0.3;
@@ -1630,6 +1666,7 @@ const Game = window.Game = (function () {
           const lat = WALL_OFFSET + 1.8, p = offPt(n, side * lat, 1.75);
           if (!propClear(p, lat - 0.5)) continue;
           gMatte.add(G_BOX, trs(p, [0, yaw, 0], [0.22, 1.5, 8.6]), boardPal[(i / 12 + (side > 0 ? 3 : 0)) % boardPal.length | 0]);
+        for (const e of [-3.4, -1.15, 1.15, 3.4]) addCollider(p[0] + n.forward[0] * e, p[2] + n.forward[2] * e, 0.75);
           for (const e of [-3.6, 3.6]) gMatte.add(G_BOX, trs([p[0] + n.forward[0] * e, p[1] - 0.9, p[2] + n.forward[2] * e], [0, yaw, 0], [0.16, 1.9, 0.16]), [0.2, 0.2, 0.22]);
         }
       }
@@ -1637,6 +1674,7 @@ const Game = window.Game = (function () {
         const side = (i / 22 | 0) % 2 ? 1 : -1, lat = WALL_OFFSET + 1.4, p = offPt(n, side * lat, 0);
         if (propClear(p, lat - 0.5)) {
           gMatte.add(G_CYL6, trs([p[0], p[1] + 5, p[2]], [0, 0, 0], [0.14, 10, 0.14]), [0.3, 0.31, 0.33]);
+        addCollider(p[0], p[2], 0.35);
           const hp = offPt(n, side * (lat - 1.6), 9.9);
           gMatte.add(G_BOX, trs(offPt(n, side * (lat - 0.8), 10.0), [0, yaw, 0], [1.9, 0.12, 0.14]), [0.3, 0.31, 0.33]);
           gLamp.add(G_BOX, trs(hp, [0, yaw, 0], [0.7, 0.14, 1.1]), [1, 1, 1]);
@@ -1653,6 +1691,7 @@ const Game = window.Game = (function () {
             if (!propClear(p, WALL_OFFSET + 5)) continue;
             const ty = terrainHeightAt(p[0], p[2]) - 0.2, sc = 0.8 + h2 * 1.0;
             const tint = 0.85 + hash2(i * 9.1, row * 3 + side) * 0.3;
+            addCollider(p[0], p[2], 0.55 * sc + 0.2);
             if (hash2(i * 0.37, side + row * 5) < 0.72) {      // pine
               gMatte.add(G_CYL6, trs([p[0], ty + 1.6 * sc, p[2]], [0, 0, 0], [0.26 * sc, 3.4 * sc, 0.26 * sc]), [0.3, 0.2, 0.12]);
               gMatte.add(G_CONE8, trs([p[0], ty + 4.6 * sc, p[2]], [0, h1 * 6, 0], [2.7 * sc, 5.0 * sc, 2.7 * sc]), [0.10 * tint, 0.26 * tint, 0.12 * tint]);
@@ -1671,6 +1710,7 @@ const Game = window.Game = (function () {
         if (propClear(p, WALL_OFFSET + 4)) {
           const ty = terrainHeightAt(p[0], p[2]), sc = 1.2 + hash2(i, 8.8) * 3.2;
           gMatte.add(G_ROCK, trs([p[0], ty + sc * 0.25, p[2]], [hash2(i, 1) * 3, hash2(i, 2) * 6, 0], [sc * 1.6, sc, sc * 1.3]), [0.45, 0.4, 0.36]);
+          addCollider(p[0], p[2], sc * 0.7);
         }
       }
     }
@@ -1704,7 +1744,7 @@ const Game = window.Game = (function () {
     addObj(createMesh(buildTerrainGeo(0, L / 2, 3000, L + 1400, 200, 330)), { detail: 1, rough: 1.0, cast: false });
     addObj(createMesh(buildVergeGeo()), { detail: 1, rough: 1.0, cast: false });
     addObj(createMesh(buildRoadGeo()), { detail: 2, rough: 0.7, cast: false });
-    addObj(createMesh(buildBarrierGeo()), { rough: 0.4, metal: 0.8 });
+    addObj(createMesh(buildBarrierGeo()), { rough: 0.4, metal: 0.8, barrier: true });
     const g = new Geo();
     const rnd = (a, b) => hash2(a * 12.9898 + 3.1, b * 78.233 + 1.7);
 
@@ -1719,6 +1759,7 @@ const Game = window.Game = (function () {
     }
     // Wall behind the grid so nobody reverses off the end of the world
     g.add(G_BOX, trs([0, trackNodes[0].p[1] + 0.6, -3.2], [0, 0, 0], [WALL_OFFSET * 2 + 0.6, 1.6, 0.5]), [0.62, 0.65, 0.68]);
+    for (let x = -WALL_OFFSET; x <= WALL_OFFSET + 0.1; x += 1.2) addCollider(x, -3.2, 0.7);
 
     const boardPal = [[0.9, 0.15, 0.12], [0.1, 0.35, 0.8], [0.95, 0.75, 0.1], [0.92, 0.92, 0.94], [0.1, 0.6, 0.35], [0.95, 0.42, 0.05]];
     for (let i = 0; i < N_T; i++) {
@@ -1731,12 +1772,13 @@ const Game = window.Game = (function () {
       if (i % 20 === 10) {                                       // telephone line
         const p = offPt(n, WALL_OFFSET + 7, 0), ty = terrainHeightAt(p[0], p[2]);
         g.add(G_CYL6, trs([p[0], ty + 4.6, p[2]], [0, 0, 0], [0.16, 9.6, 0.16]), [0.33, 0.24, 0.17]);
+        addCollider(p[0], p[2], 0.35);
         g.add(G_BOX, trs([p[0], ty + 8.8, p[2]], [0, 0, 0], [2.6, 0.16, 0.16]), [0.33, 0.24, 0.17]);
       }
       if (i % 230 === 115) {                                     // roadside billboard
         const side = (i / 230 | 0) % 2 ? 1 : -1, p = offPt(n, side * (WALL_OFFSET + 12), 0), ty = terrainHeightAt(p[0], p[2]);
         g.add(G_BOX, trs([p[0], ty + 7.5, p[2]], [0, side * 0.5, 0], [0.4, 5, 13]), boardPal[(i / 230 | 0) % boardPal.length]);
-        for (const e of [-4.5, 4.5]) g.add(G_CYL6, trs([p[0] + side * 0.5 * e * 0.48, ty + 2.6, p[2] + e * 0.88], [0, 0, 0], [0.25, 5.4, 0.25]), [0.25, 0.25, 0.27]);
+        for (const e of [-4.5, 4.5]) { g.add(G_CYL6, trs([p[0] + side * 0.5 * e * 0.48, ty + 2.6, p[2] + e * 0.88], [0, 0, 0], [0.25, 5.4, 0.25]), [0.25, 0.25, 0.27]); addCollider(p[0] + side * 0.5 * e * 0.48, p[2] + e * 0.88, 0.4); }
       }
       for (let k = 0; k < 2; k++) {                              // cacti, scrub and rocks
         const h1 = rnd(i, k), h2 = rnd(i * 1.7, k + 5), h3 = rnd(i * 0.31, k + 9);
@@ -1748,6 +1790,7 @@ const Game = window.Game = (function () {
         if (kind < 0.30) {                                       // saguaro cactus
           const hgt = 3.5 + h2 * 4.5, col = [0.24, 0.43, 0.2];
           g.add(G_CYL6, trs([p[0], ty + hgt / 2, p[2]], [0, 0, 0], [0.42, hgt, 0.42]), col);
+          addCollider(p[0], p[2], 0.55);
           g.add(G_BLOB, trs([p[0], ty + hgt, p[2]], [0, 0, 0], [0.86, 0.9, 0.86]), col);
           for (const sd of [-1, 1]) {
             if (rnd(i + sd, k * 3) < 0.25) continue;
@@ -1764,6 +1807,7 @@ const Game = window.Game = (function () {
           const sc = 0.8 + h2 * h2 * 5;
           if (roadDist(p[0], p[2]) < WALL_OFFSET + 1.5 + sc * 1.6) continue;
           g.add(G_ROCK, trs([p[0], ty + sc * 0.2, p[2]], [h1 * 3, h2 * 6, 0], [sc * 1.7, sc, sc * 1.4]), V.lerp([0.62, 0.36, 0.23], [0.72, 0.5, 0.34], h3));
+          if (sc > 1.2) addCollider(p[0], p[2], sc * 0.75);
         }
       }
     }
@@ -1773,6 +1817,7 @@ const Game = window.Game = (function () {
       const side = m % 2 ? 1 : -1, x = side * (330 + rnd(m, 1) * 950), z = -300 + rnd(m, 2) * (L + 600);
       const rad = 70 + rnd(m, 3) * 190, hgt = 45 + rnd(m, 4) * 120, ty = terrainHeightAt(x, z) - 6, stretch = 0.7 + rnd(m, 5) * 0.9;
       g.add(G_TALUS, trs([x, ty + hgt * 0.22, z], [0, m * 1.3, 0], [rad * 1.55, hgt * 0.44, rad * 1.55 * stretch]), [0.74, 0.54, 0.36]);
+      addCollider(x, z, rad * 1.25 * Math.min(1, stretch));
       g.add(G_MESA, trs([x, ty + hgt * 0.5, z], [0, m * 1.3, 0], [rad, hgt, rad * stretch]), [0.66, 0.36, 0.22]);
       g.add(G_MESA, trs([x, ty + hgt * 1.04, z], [0, m * 1.3, 0], [rad * 0.8, hgt * 0.1, rad * 0.8 * stretch]), [0.76, 0.5, 0.33]);
     }
@@ -1848,6 +1893,14 @@ const Game = window.Game = (function () {
       mass: 1420, mu: 1.44, cd: 0.58, cl: 1.9, awd: 0.0, redline: 8500, wheelbaseA: 1.44, wheelbaseB: 1.32,
       body: [0.88, 0.88, 0.86], accent: [1.0, 0.42, 0.04],
       stats: { spd: '420 KM/H', spdW: '100%', acc: '9.8 / 10', accW: '98%', hnd: '9.3 / 10', hndW: '93%', nit: '455 KM/H', nitW: '100%' }
+    },
+    {
+      id: 'f80', name: 'FERRARI F80', short: 'FERRARI F80', hudBadge: 'FERRARI F80 • V6 TWIN-TURBO HYBRID', tag: 'HYBRID V6', tagCol: '#ef4444', sub: 'Hybrid all-wheel drive • Sharpest handler',
+      desc: 'Rosso Corsa with a black carbon canopy and the signature visor nose. A 1,200 hp twin-turbo V6 hybrid with an electric front axle that pulls you out of corners — the best-handling car in the garage. 350 km/h (384 km/h Nitro).',
+      topSpeedKmh: 350, nitroSpeedKmh: 384, dotColor: '#ef4444',
+      mass: 1525, mu: 1.5, cd: 0.6, cl: 1.7, awd: 0.3, redline: 9000, wheelbaseA: 1.4, wheelbaseB: 1.33,
+      body: [0.78, 0.025, 0.02], accent: [0.04, 0.04, 0.045],
+      stats: { spd: '350 KM/H', spdW: '83%', acc: '9.7 / 10', accW: '97%', hnd: '9.7 / 10', hndW: '97%', nit: '384 KM/H', nitW: '84%' }
     },
     {
       id: 'ninja', bike: true, name: 'KAWASAKI NINJA H2', short: 'KAWASAKI NINJA H2', hudBadge: 'KAWASAKI NINJA H2 • 998cc SUPERCHARGED', tag: 'SUPERBIKE', tagCol: '#a3e635', sub: 'Two wheels • Leans into corners',
@@ -2011,6 +2064,11 @@ const Game = window.Game = (function () {
       cabin: [[-1.3, 0.56, 0.84, 0.92], [-0.8, 0.7, 0.82, 1.1], [-0.2, 0.74, 0.8, 1.18], [0.4, 0.73, 0.76, 1.12], [0.9, 0.68, 0.72, 0.92], [1.2, 0.58, 0.7, 0.78]],
       bodyN: 3.8, roofZ: [-0.55, 0.1], roofX: 0.42, wheelX: 0.92, mirror: [0.85, 0.94, 0.6], rimCol: [0.08, 0.08, 0.09]
     },
+    f80: {
+      body: [[-2.3, 0.82, 0.42, 0.78], [-2.16, 1.0, 0.31, 0.89], [-1.4, 1.06, 0.23, 0.95], [-0.5, 1.05, 0.21, 0.88], [0.4, 1.03, 0.21, 0.78], [1.3, 1.0, 0.21, 0.69], [2.0, 0.93, 0.24, 0.6], [2.3, 0.78, 0.29, 0.52], [2.4, 0.56, 0.34, 0.46]],
+      cabin: [[-1.25, 0.5, 0.82, 0.9], [-0.75, 0.66, 0.8, 1.06], [-0.15, 0.71, 0.77, 1.13], [0.45, 0.7, 0.73, 1.07], [0.95, 0.63, 0.68, 0.88], [1.25, 0.52, 0.66, 0.72]],
+      bodyN: 3.7, roofZ: [-0.6, 0.3], roofX: 0.5, wheelX: 0.92, mirror: [0.84, 0.92, 0.66], rimCol: [0.12, 0.12, 0.13]
+    },
     ninja: { wheelX: 0 }
   };
 
@@ -2018,12 +2076,12 @@ const Game = window.Game = (function () {
     const sh = CAR_SHAPES[style];
     const objs = [], wheels = [];
     const blackTrim = [0.03, 0.03, 0.035], carbonCol = [0.07, 0.075, 0.09], glassCol = [0.02, 0.03, 0.05], chromeCol = [0.85, 0.87, 0.9];
-    const metallic = style === 'mustang' ? 0.35 : (style === 'jesko' ? 0.45 : 0.75);
+    const metallic = style === 'mustang' ? 0.35 : (style === 'jesko' ? 0.45 : style === 'f80' ? 0.3 : 0.75);
 
     // Painted shell
     const bodyColorFn = style === 'bugatti'
       ? (x, y, z) => V.lerp(carbonCol, bodyCol, smooth(-0.55, -0.25, z + (y - 0.6) * 0.9))
-      : (style === 'huayra' || style === 'jesko')
+      : (style === 'huayra' || style === 'jesko' || style === 'f80')
         ? (x, y, z) => V.lerp(carbonCol, bodyCol, smooth(0.34, 0.44, y - (z < -1.9 ? 0.25 : 0)))    // carbon sills & tail
         : () => bodyCol;
     const body = makeLoft(sh.body, { n: sh.bodyN, tumble: 0.035, rings: 44, M: 30, color: bodyColorFn });
@@ -2142,6 +2200,24 @@ const Game = window.Game = (function () {
       body.strip(gAccent, -0.07, 0.07, 0.95, 2.36, 0.006, accentCol, 1);
       cabin.strip(gAccent, -0.07, 0.07, sh.roofZ[0], sh.roofZ[1], 0.012, accentCol, 1);
       box(gTrim, [0, 0.27, -2.32], [0.25, 0, 0], [1.8, 0.24, 0.24], carbonCol);
+    } else if (style === 'f80') {
+      // Black "visor" band across the nose that runs up into the canopy, slim light strips inside it
+      body.strip(gTrim, -0.92, 0.92, 1.72, 2.2, 0.005, carbonCol, 8);
+      for (const hx of [-0.62, 0.62]) box(gHead, [hx, 0.63, 2.05], [0.32, hx > 0 ? -0.32 : 0.32, 0], [0.36, 0.022, 0.08], [1, 1, 1]);
+      box(gTrim, [0, 0.33, 2.38], [0, 0, 0], [1.25, 0.14, 0.06], blackTrim);                         // lower intake
+      box(gTrim, [0, 0.215, 2.45], [0, 0, 0], [1.94, 0.035, 0.36], carbonCol);                       // splitter
+      body.strip(gTrim, -0.24, 0.24, 1.05, 1.6, 0.03, blackTrim, 2);                                 // S-duct exit on the bonnet
+      for (const side of [-1, 1]) {
+        box(gTrim, [side * 1.03, 0.6, -0.68], [0, 0, 0], [0.07, 0.3, 0.62], blackTrim);              // side air channel
+        box(gTail, [side * 0.55, 0.7, -2.31], [0, 0, side * -0.06], [0.62, 0.028, 0.05], [1, 1, 1]); // slim tail-light strips
+        box(gTrim, [side * 0.92, 0.98, -1.92], [0, 0, 0], [0.05, 0.12, 0.42], carbonCol);            // wing end plates
+      }
+      box(gPaint, [0, 1.0, -1.93], [-0.08, 0, 0], [1.86, 0.04, 0.42], bodyCol);                        // active rear wing (body colour)
+      box(gTrim, [0, 0.95, -1.93], [0, 0, 0], [0.5, 0.08, 0.2], carbonCol);
+      cylZ(gTrim, [0, 0.62, -2.32], 0.14, 0.12, blackTrim);                                            // centre exhaust
+      cylZ(gChrome, [0, 0.62, -2.35], 0.1, 0.14, chromeCol);
+      box(gTrim, [0, 0.28, -2.3], [0.28, 0, 0], [1.84, 0.26, 0.26], carbonCol);                        // deep diffuser
+      for (let k = -2; k <= 2; k++) box(gTrim, [k * 0.34, 0.27, -2.28], [0.28, 0, 0], [0.025, 0.26, 0.3], blackTrim);
     }
 
     const add = (g, o) => { if (!g.p.length) return null; const ob = addObj(createMesh(g), o); objs.push(ob); return ob; };
@@ -2301,11 +2377,12 @@ const Game = window.Game = (function () {
     bugatti: { k: 4, idle: 700, w: ['sawtooth', 'square', 'sine'], r: [1, 0.5, 0.25], g: [0.5, 0.5, 0.75], am: 0.22, amR: 0.25, drive: 2.6, f0: 260, fR: 1350, Q: 2.4, vol: 1.05, turbo: 0.075, sc: 0, bov: 1.0, pops: 0.2, lim: 14 },
     huayra: { k: 6, idle: 850, w: ['triangle', 'sawtooth', 'sine'], r: [1, 2, 0.5], g: [0.7, 0.28, 0.42], am: 0.08, amR: 1, drive: 2.0, f0: 520, fR: 2800, Q: 5.0, vol: 0.95, turbo: 0.06, sc: 0, bov: 1.2, pops: 0.5, lim: 17 },
     jesko: { k: 4, idle: 900, w: ['square', 'sawtooth', 'sawtooth'], r: [1, 2, 0.5], g: [0.42, 0.42, 0.32], am: 0.14, amR: 1, drive: 2.9, f0: 420, fR: 3000, Q: 4.0, vol: 0.95, turbo: 0.065, sc: 0, bov: 1.0, pops: 0.9, lim: 20 },
+    f80: { k: 3, idle: 950, w: ['sawtooth', 'square', 'sawtooth'], r: [1, 2, 0.5], g: [0.5, 0.34, 0.36], am: 0.1, amR: 1, drive: 2.7, f0: 460, fR: 3200, Q: 4.6, vol: 0.95, turbo: 0.055, sc: 0, bov: 0.8, pops: 0.6, lim: 22 },
     ninja: { k: 2, idle: 1300, w: ['sawtooth', 'square', 'triangle'], r: [1, 2, 4], g: [0.55, 0.32, 0.18], am: 0.18, amR: 1, drive: 2.6, f0: 600, fR: 3600, Q: 3.0, vol: 0.85, turbo: 0, sc: 0.05, bov: 0, pops: 0.35, lim: 26 }
   };
   let audioCtx = null, masterGain = null, comp = null, noiseBuf = null;
   let oscs = [], oscGains = [], lfo = null, lfoGain = null, amGain = null, shaper = null, limOsc = null, limDepth = null, limGate = null, limActive = false, limPopT = 0;
-  let engineGain = null, turboOsc = null, turboGain = null, driftGain = null, engineFilter = null, windGain = null;
+  let engineGain = null, turboOsc = null, turboGain = null, scOsc = null, scGain = null, driftGain = null, engineFilter = null, windGain = null;
   let audioMuted = false, userVolume = 1.25, garageRevving = false, garageRpm = 0.18, soundProfile = SOUND_PROFILES.mustang, lastLoad = 0, popCooldown = 0;
 
   function shaperCurve(drive) {
@@ -2356,6 +2433,12 @@ const Game = window.Game = (function () {
       turboOsc = audioCtx.createOscillator(); turboOsc.type = 'sine';
       turboGain = audioCtx.createGain(); turboGain.gain.value = 0.0001;
       turboOsc.connect(turboGain); turboGain.connect(comp); turboOsc.start();
+      // Supercharger: a belt-driven blower whines at a fixed multiple of engine speed (gear-like, slightly buzzy)
+      scOsc = audioCtx.createOscillator(); scOsc.type = 'triangle';
+      const scBp = audioCtx.createBiquadFilter(); scBp.type = 'bandpass'; scBp.Q.value = 2.2; scBp.frequency.value = 2500;
+      scGain = audioCtx.createGain(); scGain.gain.value = 0.0001;
+      scOsc.connect(scBp); scBp.connect(scGain); scGain.connect(comp); scOsc.start();
+      scOsc._bp = scBp;
       // Noise source shared by tyre squeal, wind, blow-off and pops
       noiseBuf = audioCtx.createBuffer(1, audioCtx.sampleRate * 2, audioCtx.sampleRate);
       const nd = noiseBuf.getChannelData(0);
@@ -2418,7 +2501,7 @@ const Game = window.Game = (function () {
     if (!audioCtx) return;
     const now = audioCtx.currentTime;
     if (audioMuted || !isActive) {
-      for (const g of [engineGain, turboGain, driftGain, windGain]) if (g) g.gain.setTargetAtTime(0.0001, now, 0.05);
+      for (const g of [engineGain, turboGain, scGain, driftGain, windGain]) if (g) g.gain.setTargetAtTime(0.0001, now, 0.05);
       lastLoad = 0; setLimiter(false, now);
       return;
     }
@@ -2434,10 +2517,15 @@ const Game = window.Game = (function () {
     if (p.turbo) {
       turboOsc.frequency.setTargetAtTime(1500 + rpmNorm * 2600, now, 0.06);
       turboGain.gain.setTargetAtTime(Math.max(0.0001, rpmNorm * rpmNorm * p.turbo * load * userVolume), now, 0.12);
-    } else if (p.sc) {
-      turboOsc.frequency.setTargetAtTime(f * 6.5, now, 0.02);
-      turboGain.gain.setTargetAtTime(Math.max(0.0001, rpmNorm * p.sc * (0.3 + 0.7 * load) * userVolume), now, 0.05);
     } else turboGain.gain.setTargetAtTime(0.0001, now, 0.05);
+    // every car above 350 km/h gets a supercharger whine on top of its engine (the Ninja H2 is supercharged too)
+    const sc = p.sc || (CAR_SPECS[selectedCarIdx].topSpeedKmh > 350 ? 0.075 : 0);
+    if (sc) {
+      const sf = rpm / 60 * 25.3;                                   // blower pulley ratio (off the engine harmonics so it stands out)
+      scOsc.frequency.setTargetAtTime(sf, now, 0.02);
+      scOsc._bp.frequency.setTargetAtTime(sf * 1.1, now, 0.03);
+      scGain.gain.setTargetAtTime(Math.max(0.0001, (0.25 + 0.75 * rpmNorm) * sc * (0.35 + 0.65 * load) * userVolume * (limiter ? 0.6 : 1)), now, 0.04);
+    } else scGain.gain.setTargetAtTime(0.0001, now, 0.05);
     engineGain.gain.setTargetAtTime((0.13 + rpmNorm * 0.3) * (0.5 + 0.5 * load) * p.vol * userVolume, now, 0.03);
     driftGain.gain.setTargetAtTime(Math.max(0.0001, clamp(slip, 0, 1) * 0.16 * userVolume), now, 0.05);
     windGain.gain.setTargetAtTime(Math.max(0.0001, speedN * speedN * 0.22 * userVolume), now, 0.1);
@@ -2530,8 +2618,9 @@ const Game = window.Game = (function () {
     let maxSteer = clamp(Math.atan(ph.L * ayMax / Math.max(spd * spd, 1)) + ph.steerSlip, 0.03, 0.56);
     maxSteer = Math.min(0.6, maxSteer + Math.min(0.38, Math.abs(beta) * 1.1));
     const assist = Math.sign(beta) * Math.max(0, Math.abs(beta) - 0.05) * 0.65;
-    const steerT = clamp(inp.steer * maxSteer + (vx > 3 ? assist : 0), -0.6, 0.6);
-    const rate = (Math.abs(steerT) < Math.abs(c.steer) ? 5.5 : 3.2) * h;
+    const STEER_SENS = 0.98;                                   // overall steering sensitivity (was 1.0)
+    const steerT = clamp(inp.steer * maxSteer * STEER_SENS + (vx > 3 ? assist : 0), -0.6, 0.6);
+    const rate = (Math.abs(steerT) < Math.abs(c.steer) ? 5.5 : 3.2 * STEER_SENS) * h;
     c.steer += clamp(steerT - c.steer, -rate, rate);
     const cd = Math.cos(c.steer), sd = Math.sin(c.steer);
 
@@ -2744,20 +2833,37 @@ const Game = window.Game = (function () {
       const s = sampleTrack(rv.dist);
       const cornering = clamp(Math.abs(s.curvature) * 90, 0, 1);
       let latT = aiLine[i] * 0.9 + rv.lane * Math.min(1, (ROAD_HALF_WIDTH - 1.5) / 4.2) * (1 - 0.65 * cornering);
-      // keep clear of the player and other rivals
-      const pl = player.totalDist - rv.totalDist;
-      if (Math.abs(pl) < 9 && Math.abs(player.lat - latT) < 2.6) latT += (latT >= player.lat ? 1 : -1) * 2.4;
-      for (const o of rivals) {
-        if (o === rv) continue;
+      // Keep clear of the player and other rivals. The side to pass on is chosen ONCE when a car comes
+      // close and kept until it is well clear, so the target can't flip back and forth every frame.
+      rv.sides = rv.sides || {};
+      const avoid = (key, gapAlong, otherLat, nearZone, width) => {
+        if (Math.abs(gapAlong) > nearZone + 6) { delete rv.sides[key]; return 0; }
+        if (Math.abs(gapAlong) > nearZone) return 0;
+        if (rv.sides[key] === undefined) rv.sides[key] = (rv.lat - otherLat) >= 0 ? 1 : -1;
+        const want = otherLat + rv.sides[key] * width;
+        return (rv.sides[key] > 0 ? Math.max(0, want - latT) : Math.min(0, want - latT));
+      };
+      let dodge = avoid('p', player.totalDist - rv.totalDist, player.lat, 9, 2.7);
+      rivals.forEach((o, oIdx) => {
+        if (o === rv) return;
         const d = o.totalDist - rv.totalDist;
-        if (d > 0 && d < 7 && Math.abs(o.lat - rv.lat) < 2.3) rv.speed = Math.min(rv.speed, o.speed - 0.3);
-        if (Math.abs(d) < 8 && Math.abs(o.lat - latT) < 2.4) latT += (rv.lat >= o.lat ? 1 : -1) * 2.2;
-      }
-      latT = clamp(latT, -(ROAD_HALF_WIDTH - 1.3), ROAD_HALF_WIDTH - 1.3);
-      const prevLat = rv.lat;
-      rv.lat += clamp(latT - rv.lat, -4.5 * dt, 4.5 * dt);
+        if (d > 0 && d < 7 && Math.abs(o.lat - rv.lat) < 2.3) rv.speed = Math.max(0, Math.min(rv.speed, o.speed - 0.3));
+        const dd = avoid(oIdx, d, o.lat, 8, 2.5);
+        if (Math.abs(dd) > Math.abs(dodge)) dodge = dd;
+      });
+      rv.dodge = (rv.dodge || 0) + (dodge - (rv.dodge || 0)) * Math.min(1, dt * 2.5);
+      latT = clamp(latT + rv.dodge, -(ROAD_HALF_WIDTH - 1.3), ROAD_HALF_WIDTH - 1.3);
+      // smooth sideways motion: critically-damped spring with limited lateral speed & acceleration
+      rv.latV = rv.latV || 0;
+      const latAcc = clamp(5 * (latT - rv.lat) - 4.5 * rv.latV, -6, 6);
+      rv.latV = clamp(rv.latV + latAcc * dt, -3.5, 3.5);
+      rv.lat += rv.latV * dt;
+      if (Math.abs(rv.lat) > ROAD_HALF_WIDTH - 1.0) { rv.lat = Math.sign(rv.lat) * (ROAD_HALF_WIDTH - 1.0); rv.latV = 0; }
       rv.pos = [s.p[0] + s.right[0] * rv.lat, s.p[1] + 0.06, s.p[2] + s.right[2] * rv.lat];
-      rv.yaw = Math.atan2(s.forward[0], s.forward[2]) + Math.atan2((rv.lat - prevLat) / Math.max(dt, 1e-3), Math.max(rv.speed, 5));
+      // heading = track direction + a smoothed angle from the lateral velocity (never from a single frame's jump)
+      const yawOffT = clamp(Math.atan2(rv.latV, Math.max(rv.speed, 10)), -0.18, 0.18);
+      rv.yawOff = (rv.yawOff || 0) + (yawOffT - (rv.yawOff || 0)) * Math.min(1, dt * 6);
+      rv.yaw = Math.atan2(s.forward[0], s.forward[2]) + rv.yawOff;
       const roll = clamp(s.curvature * rv.speed * rv.speed / GRAV * 0.035, -0.05, 0.05);
       rv.mesh.updateTransform(rv.pos, rv.yaw, -s.slope * 0.9 + (rv.braking ? 0.012 : -0.006), roll, clamp(s.curvature * 2.8 * 3, -0.4, 0.4), rv.wheelSpin, rv.braking, 0);
 
@@ -2774,7 +2880,7 @@ const Game = window.Game = (function () {
             const sgn = Math.sign(lx) || 1;
             player.pos[0] += lat[0] * sgn * penX; player.pos[2] += lat[1] * sgn * penX;
             if (pvL * sgn < 0) { impact = Math.abs(pvL); const nv = -pvL * 0.3; player.vel[0] += lat[0] * (nv - pvL); player.vel[1] += lat[1] * (nv - pvL); }
-            rv.lat -= sgn * Math.min(1.2, 0.3 + impact * 0.1);
+            rv.latV = clamp((rv.latV || 0) - sgn * Math.min(3, 0.8 + impact * 0.25), -3.5, 3.5);
           } else {                           // nose-to-tail
             const sgn = Math.sign(lz) || 1;
             player.pos[0] += fwd[0] * sgn * penZ; player.pos[2] += fwd[1] * sgn * penZ;
@@ -2800,12 +2906,12 @@ const Game = window.Game = (function () {
   let camPos = [0, 6, -12], camTarget = [0, 1.5, 0], currentFov = 54 * Math.PI / 180, camYaw = 0, blurAmt = 0;
   const GRID_NODE = 3;
   const gridLat = () => -Math.min(3.2, ROAD_HALF_WIDTH * 0.5);
-  let progressDist = 0, lastTrackDist = 0, finishRun = null, scoreFrac = 0, transManual = false, gridRevs = 0.16;
+  let progressDist = 0, lastTrackDist = 0, finishRun = null, scoreFrac = 0, transManual = false, gridRevs = 0.16, freeRoam = false;
 
   function placeRivalsOnGrid() {
     const gl0 = -gridLat(), lanes = [gl0, -gl0, gl0];
     rivals.forEach((rv, idx) => {
-      rv.dist = 19 + idx * 9.5; rv.totalDist = rv.dist; rv.speed = 0; rv.lat = lanes[idx]; rv.braking = false;
+      rv.dist = 19 + idx * 9.5; rv.totalDist = rv.dist; rv.speed = 0; rv.lat = lanes[idx]; rv.braking = false; rv.latV = 0; rv.yawOff = 0; rv.dodge = 0; rv.sides = {};
       const s = sampleTrack(rv.dist);
       rv.pos = [s.p[0] + s.right[0] * rv.lat, s.p[1] + 0.06, s.p[2] + s.right[2] * rv.lat];
       rv.yaw = Math.atan2(s.forward[0], s.forward[2]);
@@ -2824,6 +2930,59 @@ const Game = window.Game = (function () {
       pt.v[1] += pt.grav * dt;
     }
   }
+
+
+  /* ---- Free roam: drive anywhere inside the world limits, on the real terrain, with solid scenery ---- */
+  function freeRoamGround(h) {
+    const x = player.pos[0], z = player.pos[2], desert = activeTrack.kind === 'desert';
+    const fwd = [Math.sin(player.yaw), 0, Math.cos(player.yaw)], rt = [fwd[2], 0, -fwd[0]];
+    const ri = roadInfo(x, z);
+    let tf = null, y, slope, rollSlope;
+    if (ri.idx >= 0) { tf = trackFrame(x, z, ri.idx, 10); player.trackIdx = tf.idx; }
+    if (tf && Math.abs(tf.lat) < WALL_OFFSET + 0.3) {               // on the road corridor: follow the paved surface
+      y = tf.y; slope = tf.slope * (fwd[0] * tf.forward[0] + fwd[2] * tf.forward[2]); rollSlope = 0;
+    } else {                                                        // open country: follow the rendered terrain mesh
+      y = meshHeightAt(x, z);
+      slope = (meshHeightAt(x + fwd[0] * 1.3, z + fwd[2] * 1.3) - meshHeightAt(x - fwd[0] * 1.3, z - fwd[2] * 1.3)) / 2.6;
+      rollSlope = (meshHeightAt(x + rt[0] * 0.9, z + rt[2] * 0.9) - meshHeightAt(x - rt[0] * 0.9, z - rt[2] * 0.9)) / 1.8;
+    }
+    const gy = y + 0.06;
+    // up-steps are instant (no sinking into a bump); drops settle over a few frames
+    player.pos[1] = gy > player.pos[1] ? gy : player.pos[1] + (gy - player.pos[1]) * Math.min(1, h * 22);
+    // hills feel steep but stay climbable (gravity uses at most ~19 degrees of slope)
+    player.visSlope = clamp(slope, -0.7, 0.7);                     // the body still tilts with the real ground
+    player.slope = clamp(slope, -0.34, 0.34); player.trkFwd = fwd; player.rollSlope = clamp(rollSlope, -0.6, 0.6);
+    const onRoad = ri.dist < ROAD_HALF_WIDTH + KERB_W + 0.4;
+    player.surfMu = onRoad ? 1 : (desert ? 0.76 : 0.82);
+    player.surfDrag = onRoad ? 0 : (desert ? 1.3 : 0.9);
+    player.offRoad = !onRoad;
+    // solid scenery: trees, rocks, poles, grandstands, cacti, mesas...
+    const R = CAR_SPECS[selectedCarIdx].bike ? 0.6 : 1.15;
+    forEachColliderNear(player.pos[0], player.pos[2], 40, (c) => {
+      const dx = player.pos[0] - c[0], dz = player.pos[2] - c[1], d = Math.hypot(dx, dz), min = c[2] + R;
+      if (d >= min || d < 1e-4) return;
+      const nx = dx / d, nz = dz / d;
+      player.pos[0] += nx * (min - d); player.pos[2] += nz * (min - d);
+      const vn = player.vel[0] * nx + player.vel[1] * nz;
+      if (vn < 0) {
+        player.vel[0] -= nx * vn * 1.3; player.vel[1] -= nz * vn * 1.3;
+        const scrub = 1 - clamp(-vn / 30, 0.02, 0.5);
+        player.vel[0] *= scrub; player.vel[1] *= scrub; player.yawRate *= 0.5;
+        if (-vn > 3 && player.wallCooldown <= 0) {
+          playOneShot('thud', clamp(-vn / 14, 0.3, 1)); player.wallCooldown = 0.35;
+          for (let k = 0; k < 8; k++) spawnParticle([player.pos[0] - nx, player.pos[1] + 0.6, player.pos[2] - nz], [(Math.random() - 0.5) * 6, 1 + Math.random() * 4, (Math.random() - 0.5) * 6], desert ? [0.55, 0.45, 0.32, 0.5] : [0.32, 0.38, 0.2, 0.5], 1.6, 0.5);
+        }
+      }
+    });
+    // edge of the world: a soft invisible fence
+    const b = activeTrack.bounds;
+    const cx = clamp(player.pos[0], b[0], b[2]), cz = clamp(player.pos[2], b[1], b[3]);
+    if (cx !== player.pos[0]) { player.vel[0] = 0; player.pos[0] = cx; edgeWarn(); }
+    if (cz !== player.pos[2]) { player.vel[1] = 0; player.pos[2] = cz; edgeWarn(); }
+    return { dist: tf ? tf.dist : lastTrackDist, lat: tf ? tf.lat : 999, y, forward: fwd, right: rt, slope: player.slope, curvature: 0 };
+  }
+  let edgeWarnT = 0;
+  function edgeWarn() { if (simTime - edgeWarnT > 3) { edgeWarnT = simTime; showCenterBanner('EDGE OF THE MAP', 'TURN BACK'); } }
 
   function playerWallAndSurface(tf) {
     const al = Math.abs(tf.lat);
@@ -2956,6 +3115,7 @@ const Game = window.Game = (function () {
     for (let s = 0; s < steps; s++) {
       stepCar(player, ph, inp, h);
       inp.shift = 0;
+      if (freeRoam) { tf = freeRoamGround(h); continue; }
       tf = trackFrame(player.pos[0], player.pos[2], player.trackIdx, 30);
       player.trackIdx = tf.idx;
       playerWallAndSurface(tf);
@@ -2970,14 +3130,14 @@ const Game = window.Game = (function () {
     if (spd > player.topSpeedRecorded) player.topSpeedRecorded = spd;
 
     // Progress (unwrapped distance) & wrong-way detection
-    let dd = tf.dist - lastTrackDist;
+    let dd = freeRoam ? 0 : tf.dist - lastTrackDist;
     if (TRACK_CLOSED) { if (dd > totalTrackLength / 2) dd -= totalTrackLength; else if (dd < -totalTrackLength / 2) dd += totalTrackLength; }
     const crossedLine = TRACK_CLOSED && dd > 0 && Math.abs(dd) < 60 && lastTrackDist > totalTrackLength * 0.9 && ((tf.dist % totalTrackLength) + totalTrackLength) % totalTrackLength < totalTrackLength * 0.1;
     lastTrackDist = tf.dist;
     progressDist += dd;
     player.totalDist = progressDist;
     const alongV = player.vel[0] * tf.forward[0] + player.vel[1] * tf.forward[2];
-    if (alongV < -4) { player.wrongWayT += dt; if (player.wrongWayT > 1.2) { showCenterBanner('WRONG WAY', 'TURN AROUND'); player.wrongWayT = 0.2; } } else player.wrongWayT = 0;
+    if (alongV < -4 && !freeRoam) { player.wrongWayT += dt; if (player.wrongWayT > 1.2) { showCenterBanner('WRONG WAY', 'TURN AROUND'); player.wrongWayT = 0.2; } } else player.wrongWayT = 0;
 
     // Drift / speed scoring
     const beta = spd > 6 ? Math.abs(Math.atan2(player.vy, Math.max(Math.abs(player.vx), 0.5))) : 0;
@@ -2993,9 +3153,9 @@ const Game = window.Game = (function () {
 
     // Body motion on the suspension
     const along = Math.sin(player.yaw) * tf.forward[0] + Math.cos(player.yaw) * tf.forward[2];
-    const targetPitch = -tf.slope * along * 0.9 + clamp(-player.axS * 0.0042 * (CAR_SPECS[selectedCarIdx].bike ? 2.2 : 1), -0.11, 0.08);
+    const targetPitch = -(freeRoam ? (player.visSlope || 0) : tf.slope) * along * 0.9 + clamp(-player.axS * 0.0042 * (CAR_SPECS[selectedCarIdx].bike ? 2.2 : 1), -0.11, 0.08);
     const isBike = !!CAR_SPECS[selectedCarIdx].bike;
-    const targetRoll = isBike ? clamp(-Math.atan(player.ayS / GRAV) * 0.95, -0.9, 0.9) : clamp(player.ayS * 0.0045, -0.075, 0.075);
+    const targetRoll = (isBike ? clamp(-Math.atan(player.ayS / GRAV) * 0.95, -0.9, 0.9) : clamp(player.ayS * 0.0045, -0.075, 0.075)) + (freeRoam ? Math.atan(player.rollSlope || 0) : 0);
     player.pitch += (targetPitch - player.pitch) * Math.min(1, dt * 9);
     player.roll += (targetRoll - player.roll) * Math.min(1, dt * (isBike ? 4.5 : 9));
     const rough = player.offRoad ? 0.035 : (Math.abs(tf.lat) > ROAD_HALF_WIDTH - 0.3 ? 0.012 : 0);
@@ -3039,7 +3199,8 @@ const Game = window.Game = (function () {
     }
 
     // Checkpoints in order, lap completes when the line itself is crossed
-    if (player.nextCp < CHECKPOINT_COUNT) {
+    if (freeRoam) { /* no laps, checkpoints or finish in free roam */ }
+    else if (player.nextCp < CHECKPOINT_COUNT) {
       const cpObj = checkpoints[player.nextCp];
       if (Math.hypot(player.pos[0] - cpObj.node.p[0], player.pos[2] - cpObj.node.p[2]) < WALL_OFFSET + 4) {
         playOneShot('checkpoint');
@@ -3065,7 +3226,7 @@ const Game = window.Game = (function () {
       if (player.chainTimer <= 0) { player.totalScore += Math.round(player.chainPts * player.chainMult); player.chainPts = 0; player.chainMult = 1.0; }
     }
 
-    updateRivals(dt);
+    if (!freeRoam) updateRivals(dt);
 
     // Camera
     const kmh = spd * 3.6;
@@ -3210,7 +3371,7 @@ const Game = window.Game = (function () {
     setText('hud-time', formatTime(player.elapsedTime));
     setText('hud-best', formatTime(player.bestLapTime));
     const lapLen = TRACK_CLOSED ? totalTrackLength : activeTrack.finishDist;
-    setText('hud-lap-pct', `${clamp(Math.round(wrapDist(lastTrackDist) / lapLen * 100), 0, 100)}%`);
+    setText('hud-lap-pct', freeRoam ? (player.offRoad ? 'OFF-ROAD' : 'ON ROAD') : `${clamp(Math.round(wrapDist(lastTrackDist) / lapLen * 100), 0, 100)}%`);
     const spd = Math.hypot(player.vel[0], player.vel[1]);
     drawDial();
     const badge = $('drift-badge');
@@ -3249,15 +3410,16 @@ const Game = window.Game = (function () {
     miniCtx.strokeStyle = 'rgba(148, 163, 184, 0.5)'; miniCtx.lineWidth = 4; miniCtx.lineJoin = 'round'; miniCtx.stroke();
     const [sx, sy] = toMap(trackNodes[0].p);
     miniCtx.fillStyle = '#fff'; miniCtx.fillRect(sx - 4, sy - 1, 8, 2);
-    if (player.nextCp < CHECKPOINT_COUNT) {
+    if (!freeRoam && player.nextCp < CHECKPOINT_COUNT) {
       const [cpx, cpy] = toMap(checkpoints[player.nextCp].node.p);
       miniCtx.fillStyle = '#38bdf8'; miniCtx.beginPath(); miniCtx.arc(cpx, cpy, 3.5, 0, Math.PI * 2); miniCtx.fill();
     }
-    for (const rv of rivals) {
+    if (!freeRoam) for (const rv of rivals) {
       const [rx, ry] = toMap(rv.pos);
       miniCtx.fillStyle = rv.dotColor; miniCtx.beginPath(); miniCtx.arc(rx, ry, 3.2, 0, Math.PI * 2); miniCtx.fill();
     }
-    const [px, py] = toMap(player.pos);
+    let [px, py] = toMap(player.pos);
+    px = clamp(px, 5, W - 5); py = clamp(py, 5, H - 5);           // free roam can leave the track's map area
     miniCtx.save(); miniCtx.translate(px, py); miniCtx.rotate(-player.yaw);
     miniCtx.fillStyle = '#ff6600'; miniCtx.beginPath(); miniCtx.moveTo(0, -6); miniCtx.lineTo(4.5, 5); miniCtx.lineTo(-4.5, 5); miniCtx.closePath(); miniCtx.fill();
     miniCtx.restore();
@@ -3306,7 +3468,7 @@ const Game = window.Game = (function () {
       gl.uniformMatrix4fv(shadowProg.u.u_lightVP, false, cs.vp);
       gl.polygonOffset(ci === 0 ? 1.5 : 2.5, ci === 0 ? 3.0 : 5.0);
       for (const o of sceneObjects) {
-        if (!o.visible || !o.cast || (o.env && o.env !== activeTrack)) continue;
+        if (!o.visible || !o.cast || (o.env && o.env !== activeTrack) || (freeRoam && o.barrier)) continue;
         gl.uniformMatrix4fv(shadowProg.u.u_model, false, o.model);
         drawMesh(o.mesh);
       }
@@ -3352,7 +3514,7 @@ const Game = window.Game = (function () {
     gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, cascades[0].tex); gl.uniform1i(U.u_shadow0, 0);
     gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, cascades[cascades.length - 1].tex); gl.uniform1i(U.u_shadow1, 1);
     for (const o of sceneObjects) {
-      if (!o.visible || (o.env && o.env !== activeTrack)) continue;
+      if (!o.visible || (o.env && o.env !== activeTrack) || (freeRoam && o.barrier)) continue;
       gl.uniformMatrix4fv(U.u_model, false, o.model);
       gl.uniformMatrix3fv(U.u_nmat, false, o.nmat);
       gl.uniform3fv(U.u_color, o.color); gl.uniform3fv(U.u_emissive, o.emissive);
@@ -3475,20 +3637,24 @@ const Game = window.Game = (function () {
   function buildMenuCards() {
     $('car-cards').innerHTML = CAR_SPECS.map((s, i) =>
       `<button class="mx-card" onclick="Game.selectCar(${i})"><div class="mx-card-top"><span class="mx-tag" style="color:${s.tagCol};background:${s.tagCol}22">${esc(s.tag)}</span><span class="mx-spd">${s.topSpeedKmh} KM/H</span></div><div class="mx-card-name">${esc(s.short)}</div><div class="mx-card-sub">${esc(s.sub)}</div></button>`).join('');
-    $('env-cards').innerHTML = TRACKS.map((t, i) =>
-      `<button class="mx-env" onclick="Game.selectEnv(${i})"><div class="mx-env-art mx-art-${t.kind}"><div class="mx-art-road"></div></div><div class="mx-env-body"><div class="mx-env-name">${esc(t.name)}</div><div class="mx-env-sub">${esc(t.sub)}</div></div></button>`).join('');
+    const card = (t, i, free) =>
+      `<button class="mx-env" data-env="${i}" data-free="${free ? 1 : 0}" onclick="Game.selectEnv(${i}, ${free})"><div class="mx-env-art mx-art-${t.kind}"><div class="mx-art-road"></div>${free ? '<span class="mx-fr-badge">🧭 FREE ROAM</span>' : '<span class="mx-race-badge">🏁 RACE</span>'}</div><div class="mx-env-body"><div class="mx-env-name">${esc(free ? t.worldName : t.name)}</div><div class="mx-env-sub">${esc(free ? 'Open world · no rivals, no timer · drive anywhere' : t.sub)}</div></div></button>`;
+    $('env-cards').innerHTML = '<div class="mx-env-sec">RACES</div>' + TRACKS.map((t, i) => card(t, i, false)).join('') +
+      '<div class="mx-env-sec">FREE ROAM</div>' + TRACKS.map((t, i) => card(t, i, true)).join('');
   }
   function refreshHome() {
     const cp = $('home-car-pick'), ep = $('home-env-pick');
     cp.textContent = carPicked ? '✓ ' + CAR_SPECS[selectedCarIdx].short + (transManual ? ' · MANUAL' : ' · AUTO') : 'No vehicle chosen';
-    ep.textContent = envPicked ? '✓ ' + TRACKS[envIdx].name : 'No environment chosen';
+    const envName = freeRoam ? 'FREE ROAM · ' + TRACKS[envIdx].worldName : TRACKS[envIdx].name;
+    ep.textContent = envPicked ? '✓ ' + envName : 'No environment chosen';
+    $('home-start').textContent = freeRoam && envPicked ? '🧭 START FREE ROAM' : '🏁 START RACE';
     cp.classList.toggle('mx-pick-empty', !carPicked); ep.classList.toggle('mx-pick-empty', !envPicked);
     const ready = carPicked && envPicked;
     $('home-start').disabled = !ready;
-    $('home-hint').textContent = ready ? `${CAR_SPECS[selectedCarIdx].short} on ${TRACKS[envIdx].name}. Ready when you are.`
+    $('home-hint').textContent = ready ? `${CAR_SPECS[selectedCarIdx].short} · ${envName}. Ready when you are.`
       : !carPicked && !envPicked ? 'Choose a vehicle and an environment to unlock the race.'
       : !carPicked ? 'Now choose a vehicle from the Garage.' : 'Now choose a race environment.';
-    document.querySelectorAll('#env-cards .mx-env').forEach((el, i) => el.classList.toggle('sel', envPicked && i === envIdx));
+    document.querySelectorAll('#env-cards .mx-env').forEach((el) => el.classList.toggle('sel', envPicked && +el.dataset.env === envIdx && (el.dataset.free === '1') === freeRoam));
   }
   function showMenu(page) {
     menuPage = page; raceState = 'GARAGE'; garageRevving = false;
@@ -3503,8 +3669,8 @@ const Game = window.Game = (function () {
     placeRivalsOnGrid();
     refreshHome();
   }
-  function applyEnv(i) {
-    envIdx = i;
+  function applyEnv(i, free) {
+    envIdx = i; freeRoam = !!free;
     useTrack(TRACKS[i]);
     computeMapFit();
     skidCount = 0; skidHead = 0; particles.length = 0;
@@ -3513,10 +3679,14 @@ const Game = window.Game = (function () {
     const t = TRACKS[i];
     $('hud-lap-total').textContent = '/ ' + t.laps;
     $('hud-track-name').textContent = `${t.name} (${((t.closed ? t.total : t.finishDist) / 1000).toFixed(1)} KM)`;
-    $('hud-gold-label').textContent = `RACE TIME (GOLD < ${formatTime(t.gold).slice(0, 5)})`;
+    $('hud-gold-label').textContent = freeRoam ? `FREE ROAM · ${t.worldName}` : `RACE TIME (GOLD < ${formatTime(t.gold).slice(0, 5)})`;
+    if (freeRoam) $('hud-track-name').textContent = t.worldName;
+    $('hud-best').parentElement.style.display = freeRoam ? 'none' : '';
+    document.body.classList.toggle('free-roam', freeRoam);
+    for (const rv of rivals) rv.mesh.setVisible(!freeRoam);
     hudCache['hud-cp'] = null;
   }
-  function selectEnv(i) { applyEnv(i); envPicked = true; showMenu('home'); }
+  function selectEnv(i, free) { applyEnv(i, free); envPicked = true; showMenu('home'); }
   function openTransPicker() { $('trans-modal').classList.add('show'); }
   function closeTransPicker() { $('trans-modal').classList.remove('show'); }
   function setTransmission(manual) {
@@ -3547,6 +3717,12 @@ const Game = window.Game = (function () {
     skidCount = 0; skidHead = 0; particles.length = 0;
     placeRivalsOnGrid();
     camYaw = player.yaw;
+    if (freeRoam) {                       // no grid, no countdown: you're straight in, alone
+      resetPlayerToNode(GRID_NODE, 0);
+      raceState = 'RACING';
+      showCenterBanner('FREE ROAM', activeTrack.worldName + ' · ☰ TO EXIT');
+      return;
+    }
     raceState = 'COUNTDOWN'; gridRevs = 0.16;
     countdownTimer = 3.0; lastCdSec = 4;
     const cdOverlay = $('countdown-overlay');
@@ -3660,6 +3836,7 @@ const Game = window.Game = (function () {
   function setVolume(val) { initAudio(); userVolume = parseFloat(val) / 100; if (masterGain) masterGain.gain.value = userVolume; }
   function resetCarToTrack() {
     if (raceState !== 'RACING') return;
+    if (freeRoam) player.trackIdx = findClosestTrackNode(player.pos[0], player.pos[2]).idx;   // nearest road anywhere
     resetPlayerToNode(player.trackIdx, 0);
     showCenterBanner('CAR RESET', 'BACK ON CENTERLINE');
   }
@@ -3709,9 +3886,9 @@ const Game = window.Game = (function () {
     startRace, restartRace: startRace, openGarage, showMenu, selectEnv, confirmCar, openTransPicker, closeTransPicker, toggleTransmission, toggleQuickMenu, selectCar, revGarageEngine, cycleCamera, cycleSkyPreset, cycleQuality,
     toggleUnits, toggleAudio, setVolume, resetCarToTrack, downloadGithubZip,
     // test / debug hooks
-    _dbg: { player, rivals, keys, TRACKS, CAR_SPECS, PHYS, stepCar, newCarState, trackFrame, sampleTrack, roadDist, sceneObjects, setQuality,
+    _dbg: { mesh: (x, z) => meshHeightAt(x, z), cols: (x, z) => { const o = []; forEachColliderNear(x, z, 8, c => { const d = Math.hypot(x - c[0], z - c[1]); if (d < c[2] + 3) o.push([+d.toFixed(1), c[2]]); }); return o; }, player, rivals, keys, TRACKS, CAR_SPECS, PHYS, stepCar, newCarState, trackFrame, sampleTrack, roadDist, sceneObjects, setQuality,
       track: () => activeTrack, ai: () => ({ aiSpeed, aiLine }), state: () => raceState, tick: (dt) => updatePhysics(dt), total: () => totalTrackLength,
-      shift: requestShift, setManual: setTransmission, isPaused: () => paused, pick: (c, e) => { selectCar(c, true); carPicked = true; applyEnv(e); envPicked = true; garageRevving = false; } }
+      shift: requestShift, setManual: setTransmission, isPaused: () => paused, free: () => freeRoam, pick: (c, e, fr) => { selectCar(c, true); carPicked = true; applyEnv(e, fr); envPicked = true; garageRevving = false; } }
   };
 })();
 </script>

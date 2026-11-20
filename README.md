@@ -13,13 +13,19 @@ A self-contained 3D WebGL2 racing game in a single HTML file: custom HDR rendere
 - **Bugatti Chiron Pur Sport** — all-wheel drive, heavy but brutal • 322 km/h
 - **Pagani Huayra** — rear-wheel drive, light and agile • 370 km/h
 - **Koenigsegg Jesko** — rear-wheel drive, fastest in the garage • 420 km/h
+- **Ferrari F80** — hybrid all-wheel drive, sharpest handler • 350 km/h
 - **Kawasaki Ninja H2** — superbike, leans into corners, hardest to master • 300 km/h
 
 All vehicles are stylised models built in code, not licensed replicas.
 
 ## Environments
+**Races**
 - **Horizon Apex Circuit** — 4.1 km, 3 laps, hills, forest and a hairpin. Gold: under 5:00.
 - **Desert Highway** — 5 km sprint down a dead-straight 2-lane road with dunes, mesas and heat haze. Gold: under 1:10.
+
+**Free roam** (no rivals, no timer, drive anywhere — trees, rocks and buildings are solid)
+- **Horizon Valley** — the hills and forest around the circuit.
+- **Mojave Desert** — the open desert around the highway.
 
 Rivals are matched to the class of vehicle you pick.
 
@@ -28,15 +34,19 @@ Rivals are matched to the class of vehicle you pick.
 - Weight transfer, aerodynamic drag and downforce, 7-speed automatic gearbox.
 - Run-off areas with reduced grip; solid barriers on both environments.
 
+## Gearbox & sound
+Choose **Automatic** or **Manual** when you pick a vehicle. Every vehicle has its own engine sound, gear-change sounds, rev-matching on downshifts and a stuttering rev limiter. Cars faster than 350 km/h also have a supercharger whine.
+
 ## Controls
 - **W / S or Arrow Up / Down:** Accelerate & Brake (hold brake at a standstill to reverse)
 - **A / D or Arrow Left / Right:** Steer
+- **R / C:** Shift up / down (manual gearbox)
 - **Spacebar:** Handbrake (kicks the tail out; drifting builds skill multiplier & nitro)
 - **Shift / N:** Nitro (above 80% charge: purple Shockwave)
-- **C:** Camera • **L:** Lighting (Sunset, Midday, Night) • **G:** Graphics quality • **R:** Reset car • **M:** Mute
+- **V:** Camera • **L:** Lighting (Sunset, Midday, Night) • **G:** Graphics quality • **Backspace:** Reset car • **M:** Mute • **Esc:** Quick menu (pauses)
 
 ## Graphics Quality
-The ✨ button (or **G**) switches between Low, Medium and High. Phones start on Low; desktops start on High.
+The ✨ option in the ☰ quick menu (or **G**) switches between Low, Medium and High. Phones start on Low; desktops start on High.
 
 ## Running Locally or on GitHub Pages
 Open `index.html` in any modern WebGL2 browser, or enable **GitHub Pages** on the repository's main branch.
